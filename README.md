@@ -80,3 +80,14 @@ git push -u origin feature/HU-12-login
 
 - `.env` nunca se sube; solo `.env.example`.
 - PRs pequeños (idealmente < 400 líneas).
+
+## Docker
+
+El `Dockerfile` construye la web con Node 22 y la sirve con nginx (con el mismo *rewrite* del SPA que `vercel.json`).
+El stack completo (API + BD + web) se levanta con el `docker-compose.yml` del repo de backend: ver la [guía de despliegue, sección 7](https://github.com/IA-P1-BCN/Resto-API_Backend/blob/dev/docs/deploy.md#7-docker-en-local-hu-02).
+
+```bash
+# Solo el frontend:
+docker build -t restoapi-frontend --build-arg VITE_API_URL=http://localhost:8000 .
+docker run --rm -p 5173:80 restoapi-frontend    # http://localhost:5173
+```
