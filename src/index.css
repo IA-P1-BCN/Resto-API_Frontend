@@ -558,3 +558,202 @@ tbody tr:last-child td {
   background: var(--color-danger-bg);
   color: var(--color-danger-text);
 }
+
+/* Pedidos */
+h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+.pedido-form {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.pedido-form h2 {
+  margin: 0;
+}
+
+.pedido-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.carta-grupo + .carta-grupo {
+  margin-top: 1rem;
+}
+
+.carta-rapida,
+.comanda-lineas,
+.ticket-lineas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.carta-rapida {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+
+.btn-plato {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.comanda {
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.comanda-lineas li {
+  display: grid;
+  gap: 0.35rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.comanda-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cantidad {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.cantidad output {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.comanda-total {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.75rem 0 0;
+  font-size: 1.1rem;
+}
+
+.acciones-fila {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.pedido-pendiente {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.pedido-en_cocina {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.pedido-servido,
+.pedido-pagado {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.pedido-cancelado {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+/* Cocina */
+.cocina-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.conexion {
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.conexion-open {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.conexion-connecting {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.conexion-closed {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.kanban-col {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.kanban-col h2 {
+  margin: 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ticket {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.ticket-nuevo {
+  border-color: var(--color-warning-text);
+  box-shadow: 0 0 0 2px var(--color-warning-bg);
+}
+
+.ticket-header {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.ticket-lineas li {
+  display: grid;
+  font-size: 1.05rem;
+}
+
+.ticket-nota {
+  color: var(--color-warning-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .pedido-grid,
+  .kanban {
+    grid-template-columns: 1fr;
+  }
+}

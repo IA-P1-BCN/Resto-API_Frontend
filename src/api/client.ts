@@ -10,6 +10,8 @@ export const api = axios.create({
   baseURL: API_URL,
   // Margen para el cold start de Render (~50 s)
   timeout: 70_000,
+  // Listas como ?estado=a&estado=b (lo que espera FastAPI), no ?estado[]=a
+  paramsSerializer: { indexes: null },
 })
 
 api.interceptors.request.use((config) => {

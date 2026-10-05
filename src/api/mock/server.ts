@@ -1,9 +1,24 @@
 // "Servidor" simulado: aplica las mismas reglas que la API (filtros, paginación,
 // permisos por rol, solapamientos y capacidad) sobre los datos de db.ts.
+import { toLocalTimestamp } from '../../utils/format'
 import { mockUserFromToken } from '../mockAuth'
+import { puedeCambiar } from '../pedidoReglas'
 import { tokenStorage } from '../tokenStorage'
-import type { Categoria, EstadoMesa, Mesa, Page, Plato, Reserva, ReservaCreate } from '../types'
+import type {
+  Categoria,
+  EstadoMesa,
+  EstadoPedido,
+  LineaPedido,
+  Mesa,
+  Page,
+  Pedido,
+  PedidoCreate,
+  Plato,
+  Reserva,
+  ReservaCreate,
+} from '../types'
 import { db } from './db'
+import { mockEvents } from './events'
 
 const DURACION_MIN = 90
 
@@ -56,6 +71,47 @@ export interface PlatosFiltro {
 export interface ReservasFiltro {
   /** YYYY-MM-DD */
   fecha?: string
+}
+
+export interface PedidosFiltro {
+  estados?: EstadoPedido[]
+  mesaId?: number
+}
+
+/** Crea el pedido aplicando las reglas de la HU-07 (sin comprobar el rol). */
+function insertarPedido(data: PedidoCreate, camareroId: number): Pedido {
+  const mesa = db.mesas.find((m) => m.id === data.mesa_id)
+  if (!mesa) throw new Error('Mesa no encontrada')
+  if (data.lineas.length === 0) throw new Error('El pedido no tiene platos')
+  const lineas: LineaPedido[] = data.lineas.map((l) => {
+    const plato = db.platos.find((p) => p.id === l.plato_id)
+    if (!plato) throw new Error('Plato no encontrado')
+    // 409 en la API: no se puede pedir un plato agotado
+    if (!plato.disponible) throw new Error(`"${plato.nombre}" no está disponible`)
+    if (l.cantidad < 1) throw new Error('La cantidad debe ser al menos 1')
+    return {
+      id: db.nextLineaId++,
+      plato_id: plato.id,
+      cantidad: l.cantidad,
+      precio_unitario: plato.precio, // precio congelado
+      notas: l.notas?.trim() || null,
+      plato: { nombre: plato.nombre },
+    }
+  })
+  const pedido: Pedido = {
+    id: db.nextPedidoId++,
+    mesa_id: mesa.id,
+    camarero_id: camareroId,
+    estado: 'pendiente',
+    total: lineas.reduce((t, l) => t + l.cantidad * Number(l.precio_unitario), 0).toFixed(2),
+    creado_en: toLocalTimestamp(new Date()),
+    actualizado_en: null,
+    lineas,
+    mesa: { numero: mesa.numero },
+  }
+  db.pedidos.push(pedido)
+  mockEvents.emit({ event: 'pedido_creado', pedido })
+  return structuredClone(pedido)
 }
 
 export const mockServer = {
@@ -145,5 +201,48 @@ export const mockServer = {
     if (reserva.estado !== 'confirmada') throw new Error('Solo se pueden cancelar reservas confirmadas')
     reserva.estado = 'cancelada'
     return conMesa(reserva)
+  },
+
+  async listPedidos({ estados, mesaId }: PedidosFiltro = {}): Promise<Page<Pedido>> {
+    await delay()
+    const items = db.pedidos
+      .filter((p) => !estados || estados.includes(p.estado))
+      .filter((p) => mesaId === undefined || p.mesa_id === mesaId)
+      .sort((a, b) => a.creado_en.localeCompare(b.creado_en))
+    return paginate(structuredClone(items), 1, 100)
+  },
+
+  async createPedido(data: PedidoCreate): Promise<Pedido> {
+    await delay()
+    const user = usuarioActual()
+    if (user.rol !== 'admin' && user.rol !== 'camarero') throw new Error('No tienes permiso para crear pedidos')
+    return insertarPedido(data, user.id)
+  },
+
+  async updatePedidoEstado(id: number, estado: EstadoPedido): Promise<Pedido> {
+    await delay()
+    const user = usuarioActual()
+    const pedido = db.pedidos.find((p) => p.id === id)
+    if (!pedido) throw new Error('Pedido no encontrado')
+    if (!puedeCambiar(user.rol, pedido.estado, estado)) {
+      throw new Error(`No se puede pasar un pedido de "${pedido.estado}" a "${estado}"`)
+    }
+    pedido.estado = estado
+    pedido.actualizado_en = toLocalTimestamp(new Date())
+    mockEvents.emit({ event: 'pedido_actualizado', pedido })
+    return structuredClone(pedido)
+  },
+
+  /** Solo modo simulado: genera un pedido "de sala" para probar la cocina en directo. */
+  async simularPedidoDeSala(): Promise<Pedido> {
+    await delay(100)
+    const disponibles = db.platos.filter((p) => p.disponible)
+    const mesas = db.mesas.filter((m) => m.estado !== 'fuera_servicio')
+    const elegir = <T,>(lista: T[]) => lista[Math.floor(Math.random() * lista.length)]
+    const lineas = Array.from({ length: 1 + Math.floor(Math.random() * 3) }, () => ({
+      plato_id: elegir(disponibles).id,
+      cantidad: 1 + Math.floor(Math.random() * 2),
+    }))
+    return insertarPedido({ mesa_id: elegir(mesas).id, lineas }, 2)
   },
 }

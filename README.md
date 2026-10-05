@@ -57,6 +57,12 @@ Con `VITE_USE_MOCK=true` en el `.env`, el login funciona con usuarios de prueba 
 
 En la pantalla de login hay un botón por rol que rellena las credenciales. **En Vercel debe ser `false`.**
 
+En la vista **Cocina**, el botón *Simular pedido de sala* genera un pedido nuevo que aparece al instante, como si llegara por el WebSocket `/ws/cocina`. Los datos simulados (carta, mesas, reservas y pedidos) se reinician al recargar la página.
+
+### Tiempo real (cocina)
+
+La vista de cocina se conecta a `ws(s)://<API>/ws/cocina?token=<JWT>` y aplica los eventos `pedido_creado` y `pedido_actualizado`. Si la conexión se cae, reintenta con espera creciente (1 s, 2 s, 4 s… hasta 30 s) y, mientras tanto, consulta `GET /pedidos` cada 10 s.
+
 ### Estructura
 
 ```text

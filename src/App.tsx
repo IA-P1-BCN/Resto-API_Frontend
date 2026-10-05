@@ -5,10 +5,12 @@ import Layout from './components/Layout'
 import { RequireAuth, RequireRole } from './components/ProtectedRoute'
 import WakeUpBanner from './components/WakeUpBanner'
 import CartaPage from './pages/CartaPage'
+import CocinaPage from './pages/CocinaPage'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import MesasPage from './pages/MesasPage'
 import NotFoundPage from './pages/NotFoundPage'
+import PedidosPage from './pages/PedidosPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 import ReservasPage from './pages/ReservasPage'
 import { NAV_ITEMS } from './routes/navigation'
@@ -18,6 +20,8 @@ const PAGES: Record<string, ComponentType> = {
   '/carta': CartaPage,
   '/mesas': MesasPage,
   '/reservas': ReservasPage,
+  '/pedidos': PedidosPage,
+  '/cocina': CocinaPage,
 }
 
 export default function App() {

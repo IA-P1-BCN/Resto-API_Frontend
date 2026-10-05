@@ -24,6 +24,22 @@ export function toISODate(date: Date): string {
   return `${y}-${m}-${d}`
 }
 
+/** Fecha y hora local sin zona, como un TIMESTAMP de la BD: "2026-10-07T21:05:00". */
+export function toLocalTimestamp(date: Date): string {
+  const hh = String(date.getHours()).padStart(2, '0')
+  const mm = String(date.getMinutes()).padStart(2, '0')
+  const ss = String(date.getSeconds()).padStart(2, '0')
+  return `${toISODate(date)}T${hh}:${mm}:${ss}`
+}
+
+/** Minutos transcurridos desde un TIMESTAMP: "hace 5 min". */
+export function formatHace(fechaHora: string, ahora = Date.now()): string {
+  const minutos = Math.max(0, Math.floor((ahora - new Date(fechaHora).getTime()) / 60_000))
+  if (minutos < 1) return 'ahora mismo'
+  if (minutos < 60) return `hace ${minutos} min`
+  return `hace ${Math.floor(minutos / 60)} h ${minutos % 60} min`
+}
+
 export function todayISO(): string {
   return toISODate(new Date())
 }

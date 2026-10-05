@@ -1,7 +1,7 @@
 // Datos de prueba en memoria para el modo simulado. Siguen el modelo de la BD del plan (sección 3).
 // Los cambios (reservas nuevas, estados de mesa) duran hasta recargar la página.
-import { toISODate } from '../../utils/format'
-import type { Categoria, Mesa, Plato, Reserva } from '../types'
+import { toISODate, toLocalTimestamp } from '../../utils/format'
+import type { Categoria, LineaPedido, Mesa, Pedido, Plato, Reserva } from '../types'
 
 const CATEGORIAS: Categoria[] = [
   { id: 1, nombre: 'Entrantes', orden: 1 },
@@ -76,22 +76,55 @@ function reservasIniciales(): Reserva[] {
   ]
 }
 
+/** Pedidos en curso, con horas relativas a ahora para que la cocina tenga trabajo. */
+function pedidosIniciales(): Pedido[] {
+  const haceMin = (min: number) => toLocalTimestamp(new Date(Date.now() - min * 60_000))
+  let lineaId = 1
+  const linea = (plato_id: number, cantidad: number, notas: string | null = null): LineaPedido => {
+    const plato = PLATOS.find((p) => p.id === plato_id)!
+    return { id: lineaId++, plato_id, cantidad, precio_unitario: plato.precio, notas, plato: { nombre: plato.nombre } }
+  }
+  const p = (id: number, mesa_id: number, estado: Pedido['estado'], min: number, lineas: LineaPedido[]): Pedido => ({
+    id,
+    mesa_id,
+    camarero_id: 2,
+    estado,
+    total: lineas.reduce((t, l) => t + l.cantidad * Number(l.precio_unitario), 0).toFixed(2),
+    creado_en: haceMin(min),
+    actualizado_en: null,
+    lineas,
+    mesa: { numero: MESAS.find((m) => m.id === mesa_id)!.numero },
+  })
+  return [
+    p(1, 2, 'en_cocina', 12, [linea(7, 1, 'Al punto'), linea(2, 1), linea(15, 2)]),
+    p(2, 6, 'pendiente', 3, [linea(6, 2), linea(3, 1, 'Sin frutos secos'), linea(14, 2)]),
+    p(3, 10, 'servido', 40, [linea(1, 1), linea(16, 2)]),
+  ]
+}
+
 interface MockDb {
   categorias: Categoria[]
   platos: Plato[]
   mesas: Mesa[]
   reservas: Reserva[]
+  pedidos: Pedido[]
   nextReservaId: number
+  nextPedidoId: number
+  nextLineaId: number
 }
 
 function crearDb(): MockDb {
   const reservas = reservasIniciales()
+  const pedidos = pedidosIniciales()
   return {
     categorias: structuredClone(CATEGORIAS),
     platos: structuredClone(PLATOS),
     mesas: structuredClone(MESAS),
     reservas,
+    pedidos,
     nextReservaId: reservas.length + 1,
+    nextPedidoId: pedidos.length + 1,
+    nextLineaId: pedidos.flatMap((p) => p.lineas).length + 1,
   }
 }
 

@@ -90,3 +90,43 @@ export interface ReservaCreate {
   num_personas: number
   notas?: string
 }
+
+// --- Pedidos (HU-07 / HU-08) ---
+
+export type EstadoPedido = 'pendiente' | 'en_cocina' | 'servido' | 'pagado' | 'cancelado'
+
+/** Fila de detalle_pedido. */
+export interface LineaPedido {
+  id: number
+  plato_id: number
+  cantidad: number
+  /** Precio congelado al crear la línea. */
+  precio_unitario: number | string
+  notas: string | null
+  /** Si la API anida el plato, se usa su nombre. */
+  plato?: Pick<Plato, 'nombre'>
+}
+
+export interface Pedido {
+  id: number
+  mesa_id: number
+  camarero_id: number
+  estado: EstadoPedido
+  /** Σ(cantidad × precio_unitario), lo calcula la API. */
+  total: number | string
+  creado_en: string
+  actualizado_en: string | null
+  lineas: LineaPedido[]
+  mesa?: Pick<Mesa, 'numero'>
+}
+
+export interface PedidoCreate {
+  mesa_id: number
+  lineas: { plato_id: number; cantidad: number; notas?: string }[]
+}
+
+/** Mensaje del WebSocket /ws/cocina (plan, sección 5.2). */
+export interface CocinaEvent {
+  event: 'pedido_creado' | 'pedido_actualizado'
+  pedido: Pedido
+}

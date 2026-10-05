@@ -1,4 +1,14 @@
-import type { EstadoMesa, EstadoReserva, Ubicacion } from '../api/types'
+import type { EstadoMesa, EstadoPedido, EstadoReserva, Ubicacion } from '../api/types'
+
+export const ESTADO_PEDIDO_LABEL: Record<EstadoPedido, string> = {
+  pendiente: 'Pendiente',
+  en_cocina: 'En cocina',
+  servido: 'Servido',
+  pagado: 'Pagado',
+  cancelado: 'Cancelado',
+}
+
+export const ESTADOS_PEDIDO = Object.keys(ESTADO_PEDIDO_LABEL) as EstadoPedido[]
 
 export const UBICACION_LABEL: Record<Ubicacion, string> = {
   interior: 'Interior',
