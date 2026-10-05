@@ -1,41 +1,48 @@
-// Página provisional para validar el deploy en Vercel y la conexión con la API (CORS).
-// Se sustituye por el login y el panel en la HU-12.
-import { useEffect, useState } from 'react'
-
-const API_URL = import.meta.env.VITE_API_URL
-
-type Estado = 'comprobando' | 'ok' | 'error'
-
-const mensajes: Record<Estado, string> = {
-  comprobando: '⏳ Comprobando la API… (en el plan gratuito de Render puede tardar ~50 s en despertar)',
-  ok: '✅ API conectada',
-  error: '❌ API no disponible',
-}
+import { useEffect } from 'react'
+import { Route, Routes } from 'react-router-dom'
+import { pingHealth } from './api/auth'
+import Layout from './components/Layout'
+import { RequireAuth, RequireRole } from './components/ProtectedRoute'
+import WakeUpBanner from './components/WakeUpBanner'
+import DashboardPage from './pages/DashboardPage'
+import LoginPage from './pages/LoginPage'
+import NotFoundPage from './pages/NotFoundPage'
+import PlaceholderPage from './pages/PlaceholderPage'
+import { NAV_ITEMS } from './routes/navigation'
 
 export default function App() {
-  const [estado, setEstado] = useState<Estado>('comprobando')
-
+  // Despierta la API en Render en cuanto se abre la web (riesgo R1)
   useEffect(() => {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 60_000)
-    fetch(`${API_URL}/health`, { signal: controller.signal })
-      .then((res) => setEstado(res.ok ? 'ok' : 'error'))
-      .catch(() => setEstado('error'))
-      .finally(() => clearTimeout(timeout))
-    return () => {
-      clearTimeout(timeout)
-      controller.abort()
-    }
+    pingHealth()
   }, [])
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 640, margin: '4rem auto', padding: '0 1rem' }}>
-      <h1>🍽️ RestoAPI</h1>
-      <p>En construcción.</p>
-      <p>{mensajes[estado]}</p>
-      <p>
-        <small>API: {API_URL || '(VITE_API_URL sin configurar)'}</small>
-      </p>
-    </main>
+    <>
+      <WakeUpBanner />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          element={
+            <RequireAuth>
+              <Layout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<DashboardPage />} />
+          {NAV_ITEMS.map((item) => (
+            <Route
+              key={item.path}
+              path={item.path}
+              element={
+                <RequireRole roles={item.roles}>
+                  <PlaceholderPage item={item} />
+                </RequireRole>
+              }
+            />
+          ))}
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </>
   )
 }
