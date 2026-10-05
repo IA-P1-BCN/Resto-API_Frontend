@@ -61,11 +61,14 @@ En la pantalla de login hay un botón por rol que rellena las credenciales. **En
 
 ```text
 src/
-├── api/          # Cliente axios (interceptor JWT), auth, errores, modo simulado
-├── components/   # Layout, rutas protegidas, aviso de "despertando el servidor"
+├── api/          # Cliente axios (interceptor JWT) y un servicio por recurso (auth, menu, mesas, reservas)
+│   └── mock/     # Modo simulado: datos de prueba (db.ts) y reglas de la API (server.ts)
+├── components/   # Layout, rutas protegidas, paginación, formulario de reserva…
 ├── context/      # AuthContext / AuthProvider / useAuth
-├── pages/        # Login, panel, 403, 404 y vistas provisionales
+├── hooks/        # useQuery (carga de datos)
+├── pages/        # Login, panel, carta, mesas, reservas, 403, 404
 ├── routes/       # Navegación por rol (matriz de permisos del plan, 5.4)
+├── utils/        # Formato de precios y fechas, etiquetas
 └── test/         # Tests de Vitest
 ```
 

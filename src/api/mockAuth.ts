@@ -15,6 +15,12 @@ const TOKEN_PREFIX = 'mock-token-'
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
+/** Usuario al que pertenece un token simulado (como haría la API con el JWT). */
+export function mockUserFromToken(token: string | null): Usuario | undefined {
+  const id = Number(token?.replace(TOKEN_PREFIX, ''))
+  return MOCK_USERS.find((u) => u.id === id)
+}
+
 export const mockAuth = {
   async login(email: string, password: string): Promise<string> {
     await delay(400)
@@ -24,8 +30,7 @@ export const mockAuth = {
   },
   async me(token: string | null): Promise<Usuario> {
     await delay(200)
-    const id = Number(token?.replace(TOKEN_PREFIX, ''))
-    const user = MOCK_USERS.find((u) => u.id === id)
+    const user = mockUserFromToken(token)
     if (!user) throw new Error('Sesión no válida')
     return user
   },

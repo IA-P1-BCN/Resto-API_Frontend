@@ -11,6 +11,12 @@
   --color-warning-bg: #fff4d6;
   --color-warning-text: #7a5600;
   --color-error: #b3261e;
+  --color-success-bg: #e3f4e6;
+  --color-success-text: #1e6b2f;
+  --color-danger-bg: #fbe4e2;
+  --color-danger-text: #9a2318;
+  --color-neutral-bg: #ece8e6;
+  --color-neutral-text: #5a514d;
   --radius: 8px;
 
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -33,6 +39,12 @@
     --color-warning-bg: #3a2f12;
     --color-warning-text: #f2d48a;
     --color-error: #ff8a80;
+    --color-success-bg: #173322;
+    --color-success-text: #9fdcae;
+    --color-danger-bg: #3d1c19;
+    --color-danger-text: #f5a59c;
+    --color-neutral-bg: #34302e;
+    --color-neutral-text: #c9bfba;
   }
 }
 
@@ -286,4 +298,263 @@ input {
   .content {
     padding: 1rem;
   }
+}
+
+/* --- Vistas (HU-13) --- */
+h2 {
+  font-size: 1.15rem;
+  margin: 1.5rem 0 0.75rem;
+}
+
+ul.cards,
+ul.resumen {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+select {
+  font: inherit;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.filters,
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1.25rem;
+}
+
+.filters label,
+.toolbar label {
+  min-width: 160px;
+}
+
+label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding-bottom: 0.55rem;
+}
+
+.btn-small {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.error-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-error);
+  margin-bottom: 1rem;
+}
+
+.banner-success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
+  width: fit-content;
+}
+
+.chip-warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  font-weight: 600;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.pagination .muted {
+  margin: 0;
+}
+
+/* Carta */
+.plato {
+  display: grid;
+  gap: 0.4rem;
+  align-content: start;
+}
+
+.plato-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.precio {
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.plato-desc {
+  margin: 0;
+}
+
+.plato .muted {
+  margin: 0;
+}
+
+.plato-agotado {
+  opacity: 0.65;
+}
+
+/* Mesas */
+.resumen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mesa {
+  display: grid;
+  gap: 0.6rem;
+  border-left-width: 5px;
+}
+
+.estado-libre {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.estado-ocupada {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+.estado-reservada {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.estado-fuera_servicio {
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
+}
+
+.estado-borde-libre {
+  border-left-color: var(--color-success-text);
+}
+
+.estado-borde-ocupada {
+  border-left-color: var(--color-danger-text);
+}
+
+.estado-borde-reservada {
+  border-left-color: var(--color-warning-text);
+}
+
+.estado-borde-fuera_servicio {
+  border-left-color: var(--color-neutral-text);
+}
+
+/* Reservas */
+.reserva-form {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.reserva-form h2 {
+  margin: 0;
+}
+
+.reserva-form .filters {
+  margin-bottom: 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+td:nth-last-child(2) {
+  white-space: normal;
+  min-width: 160px;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.fila-cancelada td {
+  color: var(--color-muted);
+}
+
+.reserva-confirmada {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.reserva-cancelada {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
 }
