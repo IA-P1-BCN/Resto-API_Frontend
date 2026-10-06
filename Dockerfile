@@ -8,9 +8,11 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-# VITE_API_URL se incrusta en el build: hay que pasarlo como argumento
+# Las variables VITE_* se incrustan en el build: hay que pasarlas como argumento
 ARG VITE_API_URL=http://localhost:8000
+ARG VITE_USE_MOCK=false
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_USE_MOCK=$VITE_USE_MOCK
 RUN npm run build
 
 # --- Servidor ---
