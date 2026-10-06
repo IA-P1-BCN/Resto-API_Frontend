@@ -70,7 +70,7 @@ export default function CocinaPage() {
           {COLUMNAS.map(({ estado, titulo }) => {
             const columna = pedidos
               .filter((p) => p.estado === estado)
-              .sort((a, b) => a.creado_en.localeCompare(b.creado_en)) // el más antiguo primero
+              .sort((a, b) => a.creado_en.localeCompare(b.creado_en))
             return (
               <section key={estado} className="kanban-col" aria-label={titulo}>
                 <h2>

@@ -82,7 +82,6 @@ code {
   color: var(--color-muted);
 }
 
-/* --- Botones y formularios --- */
 .btn {
   border: 1px solid var(--color-primary);
   background: var(--color-primary);
@@ -124,7 +123,6 @@ input {
   margin: 0;
 }
 
-/* --- Tarjetas y avisos --- */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -179,7 +177,6 @@ input {
   color: var(--color-warning-text);
 }
 
-/* --- Login --- */
 .login-page {
   min-height: 100vh;
   display: grid;
@@ -217,7 +214,6 @@ input {
   text-align: center;
 }
 
-/* --- Layout --- */
 .topbar {
   display: flex;
   flex-wrap: wrap;
@@ -300,7 +296,6 @@ input {
   }
 }
 
-/* --- Vistas (HU-13) --- */
 h2 {
   font-size: 1.15rem;
   margin: 1.5rem 0 0.75rem;
@@ -420,7 +415,6 @@ label.checkbox {
   margin: 0;
 }
 
-/* Carta */
 .plato {
   display: grid;
   gap: 0.4rem;
@@ -452,7 +446,6 @@ label.checkbox {
   opacity: 0.65;
 }
 
-/* Mesas */
 .resumen {
   display: flex;
   flex-wrap: wrap;
@@ -501,7 +494,6 @@ label.checkbox {
   border-left-color: var(--color-neutral-text);
 }
 
-/* Reservas */
 .reserva-form {
   display: grid;
   gap: 1rem;
@@ -559,7 +551,6 @@ tbody tr:last-child td {
   color: var(--color-danger-text);
 }
 
-/* Pedidos */
 h3 {
   font-size: 1rem;
   margin: 0 0 0.5rem;
@@ -675,7 +666,6 @@ h3 {
   color: var(--color-danger-text);
 }
 
-/* Cocina */
 .cocina-header {
   display: flex;
   flex-wrap: wrap;

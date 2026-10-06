@@ -3,7 +3,6 @@ interface Props {
   size: number
   total: number
   onChange: (page: number) => void
-  /** Nombre de los elementos en plural, p. ej. "platos". */
   label?: string
 }
 

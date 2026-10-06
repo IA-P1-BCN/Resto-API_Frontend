@@ -1,7 +1,6 @@
 import axios from 'axios'
 import type { ApiErrorBody } from './types'
 
-/** Convierte cualquier error (axios, mock o JS) en un mensaje para mostrar al usuario. */
 export function getErrorMessage(error: unknown, fallback = 'Ha ocurrido un error inesperado'): string {
   if (axios.isAxiosError<ApiErrorBody>(error)) {
     if (!error.response) {

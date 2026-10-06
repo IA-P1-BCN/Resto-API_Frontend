@@ -39,7 +39,6 @@ export default function NuevoPedidoForm({ onCreated, onCancel }: Props) {
         .filter((g) => g.platos.length > 0),
     [categorias.data, platos.data],
   )
-  // Total = Σ(cantidad × precio), igual que lo calcula la API
   const total = lineas.reduce((t, l) => t + l.cantidad * Number(l.plato.precio), 0)
 
   function agregar(plato: Plato) {

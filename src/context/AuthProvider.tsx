@@ -7,7 +7,6 @@ import { AuthContext, type AuthStatus } from './authContext'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Usuario | null>(null)
-  // Si hay token guardado, se valida con /auth/me antes de mostrar nada
   const [status, setStatus] = useState<AuthStatus>(() => (tokenStorage.get() ? 'loading' : 'anonymous'))
 
   const logout = useCallback(() => {
@@ -16,7 +15,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus('anonymous')
   }, [])
 
-  // Restaurar la sesión al recargar la página
   useEffect(() => {
     if (!tokenStorage.get()) return
     let cancelled = false
@@ -34,7 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [logout])
 
-  // El cliente HTTP avisa cuando la API devuelve 401 (token expirado)
   useEffect(() => {
     window.addEventListener(SESSION_EXPIRED_EVENT, logout)
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, logout)

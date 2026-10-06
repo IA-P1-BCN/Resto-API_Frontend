@@ -1,5 +1,3 @@
-// Datos de prueba en memoria para el modo simulado. Siguen el modelo de la BD del plan (sección 3).
-// Los cambios (reservas nuevas, estados de mesa) duran hasta recargar la página.
 import { toISODate, toLocalTimestamp } from '../../utils/format'
 import type { Categoria, LineaPedido, Mesa, Pedido, Plato, Reserva } from '../types'
 
@@ -42,7 +40,6 @@ const MESAS: Mesa[] = [
   { id: 10, numero: 10, capacidad: 2, ubicacion: 'barra', estado: 'ocupada' },
 ]
 
-/** Reservas de hoy y mañana, para que la demo siempre tenga datos. */
 function reservasIniciales(): Reserva[] {
   const hoy = toISODate(new Date())
   const manana = toISODate(new Date(Date.now() + 24 * 60 * 60 * 1000))
@@ -76,7 +73,6 @@ function reservasIniciales(): Reserva[] {
   ]
 }
 
-/** Pedidos en curso, con horas relativas a ahora para que la cocina tenga trabajo. */
 function pedidosIniciales(): Pedido[] {
   const haceMin = (min: number) => toLocalTimestamp(new Date(Date.now() - min * 60_000))
   let lineaId = 1
@@ -130,7 +126,6 @@ function crearDb(): MockDb {
 
 export let db: MockDb = crearDb()
 
-/** Vuelve a los datos iniciales (lo usan los tests). */
 export function resetMockDb(): void {
   db = crearDb()
 }

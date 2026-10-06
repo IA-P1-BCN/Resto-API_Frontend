@@ -1,4 +1,3 @@
-// Vistas de carta, mesas y reservas (A-07) en modo simulado.
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { mockServer } from '../api/mock/server'
@@ -94,9 +93,8 @@ describe('Reservas', () => {
     loginComo('camarero')
     renderApp('/reservas')
     expect(await screen.findByText('Cumpleaños, traen tarta')).toBeInTheDocument()
-    // 4 reservas hoy + cabecera
     expect(screen.getAllByRole('row')).toHaveLength(5)
-    expect(screen.queryByText('Mesa tranquila si es posible')).not.toBeInTheDocument() // es de mañana
+    expect(screen.queryByText('Mesa tranquila si es posible')).not.toBeInTheDocument()
   })
 
   it('crea una reserva eligiendo entre las mesas disponibles', async () => {
@@ -111,7 +109,6 @@ describe('Reservas', () => {
     fireEvent.change(within(form).getByLabelText('Personas'), { target: { value: '4' } })
     await user.click(within(form).getByRole('button', { name: 'Ver mesas disponibles' }))
 
-    // Solo mesas de 4 o más, sin la que está fuera de servicio; la más ajustada primero
     const mesa = await within(form).findByLabelText('Mesa')
     const opciones = within(mesa).getAllByRole('option').map((o) => o.textContent)
     expect(opciones[0]).toBe('Mesa 3 · Interior · hasta 4 personas')
@@ -126,7 +123,6 @@ describe('Reservas', () => {
   })
 
   it('no deja reservar hoy a una hora que ya ha pasado', async () => {
-    // Las fechas anteriores a hoy ya las bloquea el navegador con min=hoy en el campo de fecha
     loginComo('camarero')
     const { user } = renderApp('/reservas')
     await user.click(await screen.findByRole('button', { name: '+ Nueva reserva' }))
@@ -154,7 +150,6 @@ describe('Reservas', () => {
     expect(await screen.findByRole('heading', { name: 'Mis reservas' })).toBeInTheDocument()
     expect(await screen.findByText('Cumpleaños, traen tarta')).toBeInTheDocument()
     expect(screen.queryByText('Mesa tranquila si es posible')).not.toBeInTheDocument()
-    // 2 reservas suyas (hoy y mañana) + cabecera, y sin filtro de fecha
     expect(screen.getAllByRole('row')).toHaveLength(3)
     expect(screen.queryByLabelText('Fecha')).not.toBeInTheDocument()
   })
@@ -163,7 +158,6 @@ describe('Reservas', () => {
 describe('reglas de reserva del servidor simulado (como la API, HU-10)', () => {
   it('rechaza una reserva que se solapa en la misma mesa', async () => {
     loginComo('camarero')
-    // La mesa 7 tiene reserva mañana a las 20:30 (90 min)
     await expect(
       mockServer.createReserva({ mesa_id: 7, fecha_hora: `${manana()}T20:00:00`, num_personas: 2 }),
     ).rejects.toThrow('La mesa 7 ya tiene una reserva en ese horario')

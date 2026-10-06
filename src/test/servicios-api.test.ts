@@ -1,5 +1,3 @@
-// Servicios de carta, mesas y reservas contra la API real (simulada a nivel HTTP):
-// comprueba endpoints, parámetros y cuerpos según el plan (sección 5.3).
 import { describe, expect, it, vi } from 'vitest'
 import { listPlatos } from '../api/menu'
 import { listMesasDisponibles, updateMesaEstado } from '../api/mesas'

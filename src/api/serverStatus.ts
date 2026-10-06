@@ -1,5 +1,3 @@
-// Detecta peticiones lentas para avisar de que Render está "despertando"
-// (el plan gratuito se duerme tras 15 min sin tráfico: riesgo R1).
 
 const SLOW_REQUEST_MS = 3000
 

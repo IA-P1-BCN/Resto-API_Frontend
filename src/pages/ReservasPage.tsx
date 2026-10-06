@@ -19,7 +19,6 @@ export default function ReservasPage() {
   const [accionError, setAccionError] = useState<string | null>(null)
   const [cancelandoId, setCancelandoId] = useState<number | null>(null)
 
-  // El personal ve las reservas de un día; el cliente, todas las suyas
   const fetchReservas = useCallback(() => listReservas(esCliente ? {} : { fecha }), [esCliente, fecha])
   const reservas = useQuery(fetchReservas)
 

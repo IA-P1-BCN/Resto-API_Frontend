@@ -1,5 +1,3 @@
-// WebSocket /ws/cocina contra la API real (con un WebSocket falso): URL, mensajes,
-// reconexión y polling de respaldo cada 10 s mientras no hay conexión (riesgo R5).
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api } from '../api/client'
@@ -23,7 +21,6 @@ class FakeWebSocket {
   close() {
     this.onclose?.()
   }
-  // Utilidades para el test
   simulateOpen() {
     this.onopen?.()
   }
@@ -92,15 +89,14 @@ describe('cliente WebSocket de cocina', () => {
     vi.advanceTimersByTime(999)
     expect(FakeWebSocket.instances).toHaveLength(1)
     vi.advanceTimersByTime(1)
-    expect(FakeWebSocket.instances).toHaveLength(2) // 1 s
+    expect(FakeWebSocket.instances).toHaveLength(2)
 
     ultimo().simulateDrop()
     vi.advanceTimersByTime(1999)
     expect(FakeWebSocket.instances).toHaveLength(2)
     vi.advanceTimersByTime(1)
-    expect(FakeWebSocket.instances).toHaveLength(3) // 2 s
+    expect(FakeWebSocket.instances).toHaveLength(3)
 
-    // Al conectar bien, la espera vuelve a empezar desde 1 s
     ultimo().simulateOpen()
     ultimo().simulateDrop()
     vi.advanceTimersByTime(1000)
@@ -127,13 +123,11 @@ describe('useCocinaFeed', () => {
     await act(() => vi.advanceTimersByTimeAsync(0))
     expect(pedidosPedidos()).toBe(1)
     expect(result.current.pedidos).toEqual([PEDIDO])
-    // Pide solo los estados de cocina, como lista que entiende FastAPI
     expect(api.getUri(requests[0])).toContain('estado=pendiente&estado=en_cocina')
 
     await act(() => vi.advanceTimersByTimeAsync(POLL_MS))
     expect(pedidosPedidos()).toBe(2)
 
-    // Conecta: recarga una vez para no perder nada y deja de consultar
     await act(async () => {
       ultimo().simulateOpen()
       await vi.advanceTimersByTimeAsync(0)
@@ -143,14 +137,12 @@ describe('useCocinaFeed', () => {
     await act(() => vi.advanceTimersByTimeAsync(POLL_MS * 3))
     expect(pedidosPedidos()).toBe(3)
 
-    // Un evento en directo se aplica sin recargar
     await act(async () => {
       ultimo().simulateMessage({ event: 'pedido_creado', pedido: { ...PEDIDO, id: 10 } })
     })
     expect(result.current.pedidos?.map((p) => p.id)).toEqual([9, 10])
     expect(result.current.nuevos.has(10)).toBe(true)
 
-    // Un pedido que pasa a "servido" sale de la lista de cocina
     await act(async () => {
       ultimo().simulateMessage({ event: 'pedido_actualizado', pedido: { ...PEDIDO, estado: 'servido' } })
     })

@@ -1,4 +1,3 @@
-// Pedidos y cocina en tiempo real (A-08) en modo simulado.
 import { screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { db } from '../api/mock/db'
@@ -28,7 +27,6 @@ describe('Pedidos (sala)', () => {
     await user.type(within(form).getByLabelText('Notas de Croquetas de jamón'), 'Sin sal')
 
     expect(within(form).getByLabelText('Cantidad de Croquetas de jamón')).toHaveTextContent('2')
-    // 2 × 8,50 + 1 × 1,80
     expect(within(form).getByTestId('total-pedido')).toHaveTextContent('18,80')
 
     await user.click(within(form).getByRole('button', { name: 'Enviar a cocina' }))
@@ -86,7 +84,6 @@ describe('Cocina en tiempo real', () => {
     const enPreparacion = screen.getByRole('region', { name: 'En preparación' })
     expect(within(pendientes).getByRole('article', { name: 'Pedido 2' })).toHaveTextContent('Sin frutos secos')
     expect(within(enPreparacion).getByRole('article', { name: 'Pedido 1' })).toHaveTextContent('Al punto')
-    // El pedido 3 ya está servido: no es trabajo de cocina
     expect(screen.queryByRole('article', { name: 'Pedido 3' })).not.toBeInTheDocument()
   })
 
@@ -112,7 +109,6 @@ describe('Cocina en tiempo real', () => {
     const nuevo = await within(pendientes).findByRole('article', { name: 'Pedido 4' })
     expect(within(nuevo).getByText('Nuevo')).toBeInTheDocument()
 
-    // Al empezarlo deja de estar marcado como nuevo
     await user.click(within(nuevo).getByRole('button', { name: 'Empezar pedido 4' }))
     const enPreparacion = screen.getByRole('region', { name: 'En preparación' })
     const empezado = await within(enPreparacion).findByRole('article', { name: 'Pedido 4' })
@@ -137,7 +133,7 @@ describe('reglas de pedidos del servidor simulado (como la API, HU-07 / HU-08)',
   it('calcula el total y congela el precio de cada línea', async () => {
     loginComo('camarero')
     const pedido = await mockServer.createPedido({ mesa_id: 1, lineas: [{ plato_id: 7, cantidad: 2 }, { plato_id: 15, cantidad: 3 }] })
-    expect(pedido.total).toBe('54.50') // 2 × 22,00 + 3 × 3,50
+    expect(pedido.total).toBe('54.50')
     db.platos.find((p) => p.id === 7)!.precio = '30.00'
     expect(db.pedidos.find((p) => p.id === pedido.id)!.lineas[0].precio_unitario).toBe('22.00')
   })

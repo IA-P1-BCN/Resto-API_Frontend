@@ -1,4 +1,3 @@
-// Cliente HTTP: interceptor JWT, sesión expirada y mensajes de error.
 import { AxiosError } from 'axios'
 import { describe, expect, it, vi } from 'vitest'
 import { api, SESSION_EXPIRED_EVENT } from '../api/client'

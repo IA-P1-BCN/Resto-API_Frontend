@@ -8,10 +8,9 @@ interface Result<T> {
   error?: string
 }
 
-/**
- * Carga datos con `fetcher` y vuelve a cargar cuando cambia (memorízalo con useCallback).
- * Mientras recarga mantiene los datos anteriores para que la vista no parpadee.
- */
+
+
+
 export function useQuery<T>(fetcher: () => Promise<T>) {
   const [version, setVersion] = useState(0)
   const [result, setResult] = useState<Result<T>>({ version: -1 })

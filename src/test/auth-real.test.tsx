@@ -1,4 +1,3 @@
-// Login contra la API (simulada a nivel HTTP): formato de la petición y sesión expirada.
 import { screen } from '@testing-library/react'
 import { AxiosError } from 'axios'
 import { describe, expect, it, vi } from 'vitest'
@@ -15,7 +14,7 @@ describe('login contra la API', () => {
     const requests = mockApi((config) => {
       if (config.url === '/auth/login') return { status: 200, data: { access_token: 'jwt-123', token_type: 'bearer' } }
       if (config.url === '/auth/me') return { status: 200, data: ADMIN }
-      return { status: 200 } // /health
+      return { status: 200 }
     })
     const { user } = renderApp('/login')
 
@@ -50,7 +49,6 @@ describe('login contra la API', () => {
 
   it('si la API no responde, lo dice claramente', async () => {
     mockApi((config) => {
-      // Así falla axios cuando no hay red o la API está caída: error sin respuesta
       if (config.url === '/auth/login') throw new AxiosError('Network Error', AxiosError.ERR_NETWORK, config)
       return { status: 200 }
     })

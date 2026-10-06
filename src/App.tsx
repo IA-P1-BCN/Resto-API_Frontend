@@ -15,7 +15,6 @@ import PlaceholderPage from './pages/PlaceholderPage'
 import ReservasPage from './pages/ReservasPage'
 import { NAV_ITEMS } from './routes/navigation'
 
-/** Vistas ya implementadas; el resto muestra "Próximamente". */
 const PAGES: Record<string, ComponentType> = {
   '/carta': CartaPage,
   '/mesas': MesasPage,
@@ -25,7 +24,6 @@ const PAGES: Record<string, ComponentType> = {
 }
 
 export default function App() {
-  // Despierta la API en Render en cuanto se abre la web (riesgo R1)
   useEffect(() => {
     pingHealth()
   }, [])

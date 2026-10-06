@@ -1,4 +1,3 @@
-// API falsa para los tests: sustituye el adaptador HTTP de axios.
 import { AxiosError, type AxiosAdapter, type AxiosResponse, type InternalAxiosRequestConfig } from 'axios'
 import { api } from '../api/client'
 

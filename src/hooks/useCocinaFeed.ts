@@ -5,7 +5,6 @@ import { ESTADOS_COCINA } from '../api/pedidoReglas'
 import { listPedidos } from '../api/pedidos'
 import type { Pedido } from '../api/types'
 
-/** Sin WebSocket, la cocina se actualiza consultando cada 10 s (riesgo R5). */
 export const POLL_MS = 10_000
 
 function aplicar(lista: Pedido[] | null, pedido: Pedido): Pedido[] {
@@ -13,10 +12,9 @@ function aplicar(lista: Pedido[] | null, pedido: Pedido): Pedido[] {
   return ESTADOS_COCINA.includes(pedido.estado) ? [...resto, pedido] : resto
 }
 
-/**
- * Pedidos que cocina tiene que preparar, en tiempo real:
- * carga inicial + eventos del WebSocket + polling mientras la conexión está caída.
- */
+
+
+
 export function useCocinaFeed() {
   const [pedidos, setPedidos] = useState<Pedido[] | null>(null)
   const [status, setStatus] = useState<ConnectionStatus>('connecting')
@@ -26,7 +24,6 @@ export function useCocinaFeed() {
 
   const refresh = useCallback(() => setReloadKey((k) => k + 1), [])
 
-  // Eventos en directo
   useEffect(
     () =>
       connectCocina({
@@ -39,7 +36,6 @@ export function useCocinaFeed() {
     [],
   )
 
-  // Carga inicial y al (re)conectar; polling mientras no haya conexión
   useEffect(() => {
     let cancelled = false
     const cargar = () =>
@@ -61,7 +57,6 @@ export function useCocinaFeed() {
     }
   }, [status, reloadKey])
 
-  /** Aplica en la lista la respuesta de un cambio hecho desde esta pantalla. */
   const actualizarLocal = useCallback((pedido: Pedido) => {
     setPedidos((lista) => aplicar(lista, pedido))
     setNuevos((ids) => {

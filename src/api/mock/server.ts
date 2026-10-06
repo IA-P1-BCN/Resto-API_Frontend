@@ -1,5 +1,3 @@
-// "Servidor" simulado: aplica las mismas reglas que la API (filtros, paginación,
-// permisos por rol, solapamientos y capacidad) sobre los datos de db.ts.
 import { toLocalTimestamp } from '../../utils/format'
 import { mockUserFromToken } from '../mockAuth'
 import { puedeCambiar } from '../pedidoReglas'
@@ -69,7 +67,6 @@ export interface PlatosFiltro {
 }
 
 export interface ReservasFiltro {
-  /** YYYY-MM-DD */
   fecha?: string
 }
 
@@ -78,7 +75,6 @@ export interface PedidosFiltro {
   mesaId?: number
 }
 
-/** Crea el pedido aplicando las reglas de la HU-07 (sin comprobar el rol). */
 function insertarPedido(data: PedidoCreate, camareroId: number): Pedido {
   const mesa = db.mesas.find((m) => m.id === data.mesa_id)
   if (!mesa) throw new Error('Mesa no encontrada')
@@ -86,14 +82,13 @@ function insertarPedido(data: PedidoCreate, camareroId: number): Pedido {
   const lineas: LineaPedido[] = data.lineas.map((l) => {
     const plato = db.platos.find((p) => p.id === l.plato_id)
     if (!plato) throw new Error('Plato no encontrado')
-    // 409 en la API: no se puede pedir un plato agotado
     if (!plato.disponible) throw new Error(`"${plato.nombre}" no está disponible`)
     if (l.cantidad < 1) throw new Error('La cantidad debe ser al menos 1')
     return {
       id: db.nextLineaId++,
       plato_id: plato.id,
       cantidad: l.cantidad,
-      precio_unitario: plato.precio, // precio congelado
+      precio_unitario: plato.precio,
       notas: l.notas?.trim() || null,
       plato: { nombre: plato.nombre },
     }
@@ -156,7 +151,6 @@ export const mockServer = {
     await delay()
     const user = usuarioActual()
     const items = db.reservas
-      // El cliente solo ve las suyas (matriz de permisos)
       .filter((r) => user.rol !== 'cliente' || r.usuario_id === user.id)
       .filter((r) => !fecha || r.fecha_hora.startsWith(fecha))
       .sort((a, b) => a.fecha_hora.localeCompare(b.fecha_hora))
@@ -169,7 +163,6 @@ export const mockServer = {
     const user = usuarioActual()
     const mesa = db.mesas.find((m) => m.id === data.mesa_id)
     if (!mesa) throw new Error('Mesa no encontrada')
-    // Mismas reglas que la API (HU-10): 422 por capacidad, 409 por solapamiento
     if (data.num_personas > mesa.capacidad) {
       throw new Error(`La mesa ${mesa.numero} es para ${mesa.capacidad} personas como máximo`)
     }
@@ -233,7 +226,6 @@ export const mockServer = {
     return structuredClone(pedido)
   },
 
-  /** Solo modo simulado: genera un pedido "de sala" para probar la cocina en directo. */
   async simularPedidoDeSala(): Promise<Pedido> {
     await delay(100)
     const disponibles = db.platos.filter((p) => p.disponible)

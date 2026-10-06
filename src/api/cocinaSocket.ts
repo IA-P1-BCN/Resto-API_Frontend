@@ -1,4 +1,3 @@
-// Conexión en tiempo real con la cocina: WebSocket /ws/cocina con reconexión automática (riesgo R5).
 import { API_URL, USE_MOCK } from '../config'
 import { mockEvents } from './mock/events'
 import { tokenStorage } from './tokenStorage'
@@ -14,7 +13,6 @@ interface Options {
 const RETRY_BASE_MS = 1000
 const RETRY_MAX_MS = 30_000
 
-/** ws(s)://<api>/ws/cocina?token=<jwt> — el navegador no permite cabeceras en un WebSocket. */
 export function cocinaSocketUrl(): string {
   const url = new URL('/ws/cocina', API_URL)
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -34,7 +32,6 @@ function isCocinaEvent(data: unknown): data is CocinaEvent {
   )
 }
 
-/** Abre la conexión y devuelve la función para cerrarla. */
 export function connectCocina({ onEvent, onStatus }: Options): () => void {
   if (USE_MOCK) {
     onStatus('connecting')
@@ -63,14 +60,12 @@ export function connectCocina({ onEvent, onStatus }: Options): () => void {
         const data: unknown = JSON.parse(String(message.data))
         if (isCocinaEvent(data)) onEvent(data)
       } catch {
-        // Mensaje que no es JSON: se ignora
       }
     }
     socket.onclose = () => {
       socket = null
       if (cerrado) return
       onStatus('closed')
-      // Reintento con espera creciente: 1 s, 2 s, 4 s… hasta 30 s
       const espera = Math.min(RETRY_BASE_MS * 2 ** intentos, RETRY_MAX_MS)
       intentos += 1
       retryTimer = setTimeout(conectar, espera)

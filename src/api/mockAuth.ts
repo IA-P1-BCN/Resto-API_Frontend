@@ -1,5 +1,3 @@
-// Usuarios de prueba para el modo simulado (VITE_USE_MOCK=true).
-// Permite trabajar en el frontend antes de que exista el login real (HU-04).
 import type { Usuario } from './types'
 
 export const MOCK_PASSWORD = 'demo1234'
@@ -15,7 +13,6 @@ const TOKEN_PREFIX = 'mock-token-'
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-/** Usuario al que pertenece un token simulado (como haría la API con el JWT). */
 export function mockUserFromToken(token: string | null): Usuario | undefined {
   const id = Number(token?.replace(TOKEN_PREFIX, ''))
   return MOCK_USERS.find((u) => u.id === id)

@@ -12,7 +12,6 @@ interface Props {
   onCancel: () => void
 }
 
-/** Paso 1: fecha, hora y personas → mesas disponibles (HU-18). Paso 2: elegir mesa y confirmar. */
 export default function NuevaReservaForm({ fechaInicial, onCreated, onCancel }: Props) {
   const [fecha, setFecha] = useState(fechaInicial)
   const [hora, setHora] = useState('21:00')
@@ -26,7 +25,6 @@ export default function NuevaReservaForm({ fechaInicial, onCreated, onCancel }: 
 
   const fechaHora = joinFechaHora(fecha, hora)
 
-  // Si cambian los datos de la búsqueda, hay que volver a buscar mesas
   function resetBusqueda() {
     setMesas(null)
     setMesaId(null)
