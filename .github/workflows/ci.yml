@@ -1,0 +1,31 @@
+name: ci
+
+# Lint + build en cada PR a dev/main y en cada push a dev.
+# El deploy lo hace Vercel con su integración de Git (producción desde main, preview por PR).
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VITE_API_URL: http://localhost:8000
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint (ESLint)
+        run: npm run lint
+      - name: Build (tsc + Vite)
+        run: npm run build
