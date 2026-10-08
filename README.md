@@ -41,7 +41,33 @@ cp .env.example .env
 | `npm run build` | Build de producción en `dist/` |
 | `npm run preview` | Sirve el build localmente |
 | `npm run lint` | ESLint |
+| `npm test` | Tests (Vitest + Testing Library) · `npm run test:watch` en modo continuo |
 | `npm run gen:api` | Genera los tipos de la API desde el backend local (`src/api/schema.d.ts`) |
+
+### Modo simulado (sin API)
+
+Con `VITE_USE_MOCK=true` en el `.env`, el login funciona con usuarios de prueba y no se llama a la API. Sirve para trabajar en la UI antes de que el backend esté listo.
+
+| Rol | Email | Contraseña |
+|---|---|---|
+| Administración | `admin@restoapi.dev` | `demo1234` |
+| Sala (camarero) | `camarero@restoapi.dev` | `demo1234` |
+| Cocina | `cocina@restoapi.dev` | `demo1234` |
+| Cliente | `cliente@restoapi.dev` | `demo1234` |
+
+En la pantalla de login hay un botón por rol que rellena las credenciales. **En Vercel debe ser `false`.**
+
+### Estructura
+
+```text
+src/
+├── api/          # Cliente axios (interceptor JWT), auth, errores, modo simulado
+├── components/   # Layout, rutas protegidas, aviso de "despertando el servidor"
+├── context/      # AuthContext / AuthProvider / useAuth
+├── pages/        # Login, panel, 403, 404 y vistas provisionales
+├── routes/       # Navegación por rol (matriz de permisos del plan, 5.4)
+└── test/         # Tests de Vitest
+```
 
 > Para añadir una dependencia: `npm install <paquete>` y subir **también** el `package-lock.json`.
 
