@@ -123,6 +123,24 @@ describe('Reservas', () => {
     expect(await screen.findByText('Comida de empresa')).toBeInTheDocument()
   })
 
+  it('el número de personas se puede borrar y reescribir con el teclado', async () => {
+    loginAs('waiter')
+    const { user } = renderApp('/reservas')
+    await user.click(await screen.findByRole('button', { name: '+ Nueva reserva' }))
+    const form = screen.getByRole('form', { name: 'Nueva reserva' })
+    fireEvent.change(within(form).getByLabelText('Fecha'), { target: { value: tomorrow() } })
+    fireEvent.change(within(form).getByLabelText('Hora'), { target: { value: '13:00' } })
+
+    const partySize = within(form).getByLabelText('Personas')
+    await user.clear(partySize)
+    await user.type(partySize, '4')
+    expect(partySize).toHaveValue(4)
+
+    await user.click(within(form).getByRole('button', { name: 'Ver mesas disponibles' }))
+    const table = await within(form).findByLabelText('Mesa')
+    expect(within(table).getAllByRole('option')[0]).toHaveTextContent('hasta 4 personas')
+  })
+
   it('no deja reservar hoy a una hora que ya ha pasado', async () => {
     loginAs('waiter')
     const { user } = renderApp('/reservas')
