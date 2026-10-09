@@ -16,7 +16,8 @@ interface Props {
 export default function NewReservationForm({ initialDate, onCreated, onCancel }: Props) {
   const [date, setDate] = useState(initialDate)
   const [time, setTime] = useState('21:00')
-  const [partySize, setPartySize] = useState(2)
+  // Texto tal cual del campo, para poder borrarlo y escribir otro número con el teclado
+  const [partySizeInput, setPartySizeInput] = useState('2')
   const [notes, setNotes] = useState('')
   const [tables, setTables] = useState<DiningTable[] | null>(null)
   const [tableId, setTableId] = useState<number | null>(null)
@@ -25,6 +26,7 @@ export default function NewReservationForm({ initialDate, onCreated, onCancel }:
   const [error, setError] = useState<string | null>(null)
 
   const reservedAt = joinDateTime(date, time)
+  const partySize = Number(partySizeInput)
 
   function resetSearch() {
     setTables(null)
@@ -33,6 +35,10 @@ export default function NewReservationForm({ initialDate, onCreated, onCancel }:
   }
 
   async function searchTables() {
+    if (!Number.isInteger(partySize) || partySize < 1 || partySize > 20) {
+      setError('Indica entre 1 y 20 personas')
+      return
+    }
     if (new Date(reservedAt) < new Date()) {
       setError('No se puede reservar en una fecha u hora pasada')
       return
@@ -111,9 +117,9 @@ export default function NewReservationForm({ initialDate, onCreated, onCancel }:
             type="number"
             min="1"
             max="20"
-            value={partySize}
+            value={partySizeInput}
             onChange={(e) => {
-              setPartySize(Math.max(1, Number(e.target.value) || 1))
+              setPartySizeInput(e.target.value)
               resetSearch()
             }}
             required
