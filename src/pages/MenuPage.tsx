@@ -1,12 +1,30 @@
 import { useCallback, useMemo, useState } from 'react'
-import { DISHES_PAGE_SIZE, listCategories, listDishes } from '../api/menu'
+import { getErrorMessage } from '../api/errors'
+import { deleteDish, DISHES_PAGE_SIZE, listCategories, listDishes } from '../api/menu'
+import type { Dish } from '../api/types'
+import CategoryManager from '../components/CategoryManager'
+import DishForm from '../components/DishForm'
 import ErrorMessage from '../components/ErrorMessage'
 import Pagination from '../components/Pagination'
+import { useAuth } from '../context/useAuth'
 import { useQuery } from '../hooks/useQuery'
 import { formatPrice, splitAllergens } from '../utils/format'
 
-/** Carta con filtros por categoría, disponibilidad y precio máximo (todos los roles). */
+/** Formulario de plato abierto: nuevo o editando uno. */
+type DishFormState = { mode: 'new' } | { mode: 'edit'; dish: Dish } | null
+
+/**
+ * Carta con filtros por categoría, disponibilidad y precio máximo (todos los roles).
+ * El admin además crea, edita y borra platos y categorías.
+ */
 export default function MenuPage() {
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'admin'
+  const [dishForm, setDishForm] = useState<DishFormState>(null)
+  const [categoriesOpen, setCategoriesOpen] = useState(false)
+  const [notice, setNotice] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
   const [categoryId, setCategoryId] = useState<number | undefined>()
   const [onlyAvailable, setOnlyAvailable] = useState(false)
   const [maxPrice, setMaxPrice] = useState('')
@@ -30,6 +48,34 @@ export default function MenuPage() {
     [categoryId, onlyAvailable, maxPriceNumber, page],
   )
   const dishes = useQuery(fetchDishes)
+
+  function showNotice(message: string) {
+    setNotice(message)
+    setActionError(null)
+  }
+
+  function handleDishSaved(dish: Dish) {
+    showNotice(dishForm?.mode === 'edit' ? `Plato "${dish.name}" guardado.` : `Plato "${dish.name}" creado.`)
+    setDishForm(null)
+    dishes.reload()
+  }
+
+  async function handleDeleteDish(dish: Dish) {
+    if (!window.confirm(`¿Borrar "${dish.name}" de la carta?`)) return
+    setDeletingId(dish.id)
+    setNotice(null)
+    setActionError(null)
+    try {
+      await deleteDish(dish.id)
+      showNotice(`Plato "${dish.name}" borrado.`)
+      if (dishForm?.mode === 'edit' && dishForm.dish.id === dish.id) setDishForm(null)
+      dishes.reload()
+    } catch (error) {
+      setActionError(`No se pudo borrar "${dish.name}": ${getErrorMessage(error)}`)
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   return (
     <>
@@ -82,6 +128,59 @@ export default function MenuPage() {
         </label>
       </form>
 
+      {isAdmin && (
+        <div className="toolbar">
+          {dishForm === null && (
+            <button
+              type="button"
+              className="btn"
+              disabled={!categories.data?.length}
+              onClick={() => {
+                setDishForm({ mode: 'new' })
+                setNotice(null)
+              }}
+            >
+              + Nuevo plato
+            </button>
+          )}
+          <button
+            type="button"
+            className="btn btn-secondary"
+            aria-expanded={categoriesOpen}
+            onClick={() => setCategoriesOpen((open) => !open)}
+          >
+            {categoriesOpen ? 'Ocultar categorías' : 'Gestionar categorías'}
+          </button>
+        </div>
+      )}
+
+      {isAdmin && categoriesOpen && categories.data && (
+        <CategoryManager
+          categories={categories.data}
+          onChanged={(message) => {
+            showNotice(message)
+            categories.reload()
+            dishes.reload()
+          }}
+        />
+      )}
+
+      {isAdmin && dishForm && categories.data && (
+        <DishForm
+          key={dishForm.mode === 'edit' ? dishForm.dish.id : 'new'}
+          categories={categories.data}
+          dish={dishForm.mode === 'edit' ? dishForm.dish : undefined}
+          onSaved={handleDishSaved}
+          onCancel={() => setDishForm(null)}
+        />
+      )}
+
+      {notice && (
+        <div className="banner banner-success" role="status">
+          {notice}
+        </div>
+      )}
+      {actionError && <ErrorMessage message={actionError} />}
       {dishes.error && <ErrorMessage message={dishes.error} onRetry={dishes.reload} />}
       {dishes.loading && !dishes.data && <p className="page-message">Cargando carta…</p>}
 
@@ -107,6 +206,30 @@ export default function MenuPage() {
                       </span>
                     ))}
                   </div>
+                  {isAdmin && (
+                    <div className="actions">
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-small"
+                        onClick={() => {
+                          setDishForm({ mode: 'edit', dish })
+                          setNotice(null)
+                        }}
+                        aria-label={`Editar ${dish.name}`}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-small"
+                        disabled={deletingId === dish.id}
+                        onClick={() => handleDeleteDish(dish)}
+                        aria-label={`Borrar ${dish.name}`}
+                      >
+                        Borrar
+                      </button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

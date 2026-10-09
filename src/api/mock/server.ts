@@ -23,6 +23,8 @@ import { mockEvents } from './events'
 
 const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms))
 
+const nextId = (items: { id: number }[]) => Math.max(0, ...items.map((i) => i.id)) + 1
+
 function paginate<T>(items: T[], page: number, size: number): Page<T> {
   const start = (page - 1) * size
   return { items: items.slice(start, start + size), total: items.length, page, size }
@@ -127,6 +129,68 @@ export const mockServer = {
         (max_price === undefined || Number(d.price) <= max_price),
     )
     return paginate(structuredClone(items), page, size)
+  },
+
+  async createCategory(data: Omit<Category, 'id'>): Promise<Category> {
+    await delay()
+    currentUser('admin')
+    if (db.categories.some((c) => c.name === data.name)) throw new Error('Ya existe una categoría con ese nombre')
+    const category: Category = { id: nextId(db.categories), ...data }
+    db.categories.push(category)
+    return { ...category }
+  },
+
+  async updateCategory(id: number, data: Partial<Omit<Category, 'id'>>): Promise<Category> {
+    await delay()
+    currentUser('admin')
+    const category = db.categories.find((c) => c.id === id)
+    if (!category) throw new Error('Categoría no encontrada')
+    if (data.name && data.name !== category.name && db.categories.some((c) => c.name === data.name)) {
+      throw new Error('Ya existe una categoría con ese nombre')
+    }
+    Object.assign(category, data)
+    return { ...category }
+  },
+
+  async deleteCategory(id: number): Promise<void> {
+    await delay()
+    currentUser('admin')
+    if (!db.categories.some((c) => c.id === id)) throw new Error('Categoría no encontrada')
+    if (db.dishes.some((d) => d.category_id === id)) {
+      throw new Error('La categoría tiene platos y no se puede borrar')
+    }
+    db.categories = db.categories.filter((c) => c.id !== id)
+  },
+
+  async createDish(data: Omit<Dish, 'id'>): Promise<Dish> {
+    await delay()
+    currentUser('admin')
+    if (!db.categories.some((c) => c.id === data.category_id)) throw new Error('Categoría no encontrada')
+    const dish: Dish = { id: nextId(db.dishes), ...data }
+    db.dishes.push(dish)
+    return { ...dish }
+  },
+
+  async updateDish(id: number, data: Partial<Omit<Dish, 'id'>>): Promise<Dish> {
+    await delay()
+    currentUser('admin')
+    const dish = db.dishes.find((d) => d.id === id)
+    if (!dish) throw new Error('Plato no encontrado')
+    if (data.category_id !== undefined && !db.categories.some((c) => c.id === data.category_id)) {
+      throw new Error('Categoría no encontrada')
+    }
+    Object.assign(dish, data)
+    return { ...dish }
+  },
+
+  async deleteDish(id: number): Promise<void> {
+    await delay()
+    currentUser('admin')
+    if (!db.dishes.some((d) => d.id === id)) throw new Error('Plato no encontrado')
+    if (db.orders.some((o) => o.items.some((i) => i.dish_id === id))) {
+      throw new Error('El plato está en algún pedido: márcalo como no disponible en lugar de borrarlo')
+    }
+    db.dishes = db.dishes.filter((d) => d.id !== id)
   },
 
   async listTables(): Promise<Page<DiningTable>> {
