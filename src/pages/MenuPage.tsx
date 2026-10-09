@@ -7,6 +7,7 @@ import DishForm from '../components/DishForm'
 import ErrorMessage from '../components/ErrorMessage'
 import Pagination from '../components/Pagination'
 import { useAuth } from '../context/useAuth'
+import { useConfirm } from '../context/useConfirm'
 import { useQuery } from '../hooks/useQuery'
 import { formatPrice, splitAllergens } from '../utils/format'
 
@@ -14,6 +15,7 @@ type DishFormState = { mode: 'new' } | { mode: 'edit'; dish: Dish } | null
 
 export default function MenuPage() {
   const { user } = useAuth()
+  const confirm = useConfirm()
   const isAdmin = user?.role === 'admin'
   const [dishForm, setDishForm] = useState<DishFormState>(null)
   const [categoriesOpen, setCategoriesOpen] = useState(false)
@@ -56,7 +58,12 @@ export default function MenuPage() {
   }
 
   async function handleDeleteDish(dish: Dish) {
-    if (!window.confirm(`¿Borrar "${dish.name}" de la carta?`)) return
+    const confirmed = await confirm({
+      title: `¿Borrar "${dish.name}" de la carta?`,
+      message: 'Si el plato está en algún pedido, márcalo como no disponible en lugar de borrarlo.',
+      confirmLabel: 'Borrar',
+    })
+    if (!confirmed) return
     setDeletingId(dish.id)
     setNotice(null)
     setActionError(null)

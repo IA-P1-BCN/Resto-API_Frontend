@@ -6,6 +6,7 @@ import EditReservationForm from '../components/EditReservationForm'
 import ErrorMessage from '../components/ErrorMessage'
 import NewReservationForm from '../components/NewReservationForm'
 import { useAuth } from '../context/useAuth'
+import { useConfirm } from '../context/useConfirm'
 import { tableLabel, useTableNumbers } from '../hooks/useLookups'
 import { useQuery } from '../hooks/useQuery'
 import { formatDate, formatTime, parseLocalTimestamp, todayISO } from '../utils/format'
@@ -18,6 +19,7 @@ function when(reservation: Reservation): string {
 
 export default function ReservationsPage() {
   const { user } = useAuth()
+  const confirm = useConfirm()
   const isCustomer = user?.role === 'customer'
 
   const [date, setDate] = useState(todayISO)
@@ -48,8 +50,12 @@ export default function ReservationsPage() {
   }
 
   async function handleDelete(reservation: Reservation) {
-    const question = `¿Borrar definitivamente la reserva del ${when(reservation)}? Si solo no vienen, mejor cancélala.`
-    if (!window.confirm(question)) return
+    const confirmed = await confirm({
+      title: `¿Borrar definitivamente la reserva del ${when(reservation)}?`,
+      message: 'Si solo no vienen, mejor cancélala: así se conserva el historial.',
+      confirmLabel: 'Borrar',
+    })
+    if (!confirmed) return
     setCancellingId(reservation.id)
     setActionError(null)
     setNotice(null)
@@ -66,7 +72,11 @@ export default function ReservationsPage() {
   }
 
   async function handleCancel(reservation: Reservation) {
-    if (!window.confirm(`¿Cancelar la reserva del ${when(reservation)}?`)) return
+    const confirmed = await confirm({
+      title: `¿Cancelar la reserva del ${when(reservation)}?`,
+      confirmLabel: 'Cancelar reserva',
+    })
+    if (!confirmed) return
     setCancellingId(reservation.id)
     setActionError(null)
     setNotice(null)

@@ -805,3 +805,34 @@ td.order-items-cell {
     grid-template-columns: 1fr;
   }
 }
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 0.45);
+}
+
+.dialog {
+  width: 100%;
+  max-width: 420px;
+  display: grid;
+  gap: 0.75rem;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.25);
+}
+
+.dialog h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.dialog p {
+  margin: 0;
+}
+
+.dialog-actions {
+  justify-content: flex-end;
+}

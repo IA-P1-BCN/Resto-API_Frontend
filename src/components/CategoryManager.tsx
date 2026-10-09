@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
 import { createCategory, deleteCategory, updateCategory } from '../api/menu'
 import type { Category } from '../api/types'
+import { useConfirm } from '../context/useConfirm'
 import ErrorMessage from './ErrorMessage'
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function CategoryManager({ categories, onChanged }: Props) {
+  const confirm = useConfirm()
   const nextSortOrder = Math.max(0, ...categories.map((c) => c.sort_order)) + 1
   const [editing, setEditing] = useState<Category | null>(null)
   const [name, setName] = useState('')
@@ -47,7 +49,8 @@ export default function CategoryManager({ categories, onChanged }: Props) {
   }
 
   async function handleDelete(category: Category) {
-    if (!window.confirm(`¿Borrar la categoría "${category.name}"?`)) return
+    const confirmed = await confirm({ title: `¿Borrar la categoría "${category.name}"?`, confirmLabel: 'Borrar' })
+    if (!confirmed) return
     setBusy(true)
     setError(null)
     try {

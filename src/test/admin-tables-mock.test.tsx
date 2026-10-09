@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { db } from '../api/mock/db'
+import { answerConfirm } from './confirmDialog'
 import { renderApp } from './renderApp'
 
 vi.mock('../config', () => ({ USE_MOCK: true, API_URL: 'http://api.test' }))
@@ -65,10 +66,10 @@ describe('Mesas: gestión (admin)', () => {
 
   it('el admin borra una mesa sin pedidos ni reservas', async () => {
     loginAs('admin')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     db.tables.push({ id: 11, number: 11, capacity: 2, location: 'bar', status: 'available' })
     const { user } = renderApp('/mesas')
     await user.click(await screen.findByRole('button', { name: 'Borrar mesa 11' }))
+    await answerConfirm(user, 'Borrar')
 
     expect(await screen.findByRole('status')).toHaveTextContent('Mesa 11 borrada.')
     await waitFor(() => expect(screen.queryByText('Mesa 11')).not.toBeInTheDocument())
@@ -76,9 +77,9 @@ describe('Mesas: gestión (admin)', () => {
 
   it('no deja borrar una mesa con pedidos o reservas y lo explica', async () => {
     loginAs('admin')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const { user } = renderApp('/mesas')
     await user.click(await screen.findByRole('button', { name: 'Borrar mesa 2' }))
+    await answerConfirm(user, 'Borrar')
 
     expect(await screen.findByRole('alert')).toHaveTextContent('márcala como fuera de servicio')
     expect(db.tables.some((t) => t.id === 2)).toBe(true)

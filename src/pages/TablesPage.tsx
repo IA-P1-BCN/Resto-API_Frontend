@@ -5,6 +5,7 @@ import type { DiningTable, TableStatus } from '../api/types'
 import ErrorMessage from '../components/ErrorMessage'
 import TableForm from '../components/TableForm'
 import { useAuth } from '../context/useAuth'
+import { useConfirm } from '../context/useConfirm'
 import { useQuery } from '../hooks/useQuery'
 import { TABLE_LOCATION_LABEL, TABLE_LOCATIONS, TABLE_STATUS_LABEL, TABLE_STATUSES } from '../utils/labels'
 
@@ -12,6 +13,7 @@ type TableFormState = { mode: 'new' } | { mode: 'edit'; table: DiningTable } | n
 
 export default function TablesPage() {
   const { user } = useAuth()
+  const confirm = useConfirm()
   const isAdmin = user?.role === 'admin'
   const tables = useQuery(listTables)
   const [savingId, setSavingId] = useState<number | null>(null)
@@ -27,7 +29,12 @@ export default function TablesPage() {
   }
 
   async function handleDelete(table: DiningTable) {
-    if (!window.confirm(`¿Borrar la mesa ${table.number}?`)) return
+    const confirmed = await confirm({
+      title: `¿Borrar la mesa ${table.number}?`,
+      message: 'Si tiene pedidos o reservas, márcala como fuera de servicio en lugar de borrarla.',
+      confirmLabel: 'Borrar',
+    })
+    if (!confirmed) return
     setSavingId(table.id)
     setSaveError(null)
     setNotice(null)

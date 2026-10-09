@@ -4,6 +4,7 @@ import { pingHealth } from './api/auth'
 import Layout from './components/Layout'
 import { RequireAuth, RequireRole } from './components/ProtectedRoute'
 import WakeUpBanner from './components/WakeUpBanner'
+import { ConfirmProvider } from './context/ConfirmProvider'
 import DashboardPage from './pages/DashboardPage'
 import KitchenPage from './pages/KitchenPage'
 import LoginPage from './pages/LoginPage'
@@ -29,7 +30,7 @@ export default function App() {
   }, [])
 
   return (
-    <>
+    <ConfirmProvider>
       <WakeUpBanner />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
@@ -56,6 +57,6 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
-    </>
+    </ConfirmProvider>
   )
 }
