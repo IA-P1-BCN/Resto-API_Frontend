@@ -14,7 +14,6 @@ export function formatDate(date: Date): string {
   return longDate.format(date)
 }
 
-/** "hace 5 min", "hace 1 h 20 min"… */
 export function formatElapsed(date: Date, now = Date.now()): string {
   const minutes = Math.max(0, Math.floor((now - date.getTime()) / 60_000))
   if (minutes < 1) return 'ahora mismo'
@@ -22,20 +21,14 @@ export function formatElapsed(date: Date, now = Date.now()): string {
   return `hace ${Math.floor(minutes / 60)} h ${minutes % 60} min`
 }
 
-/**
- * Fechas que pone la base de datos (`created_at`, `updated_at`): vienen en UTC
- * pero sin zona, así que se interpretan como UTC y no como hora local.
- */
 export function parseServerTimestamp(value: string): Date {
   return new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(value) ? value : `${value}Z`)
 }
 
-/** Fecha y hora que escribe el usuario (p. ej. `reserved_at`): hora local sin zona. */
 export function parseLocalTimestamp(value: string): Date {
   return new Date(value)
 }
 
-/** AAAA-MM-DD en hora local. */
 export function toISODate(date: Date): string {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
@@ -43,7 +36,6 @@ export function toISODate(date: Date): string {
   return `${y}-${m}-${d}`
 }
 
-/** AAAA-MM-DDTHH:MM:SS en UTC y sin zona, como los `created_at` de la API. */
 export function toServerTimestamp(date: Date): string {
   return date.toISOString().slice(0, 19)
 }

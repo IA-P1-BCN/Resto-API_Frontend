@@ -1,4 +1,3 @@
-// Gestión de mesas por el admin en modo simulado.
 import { screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { db } from '../api/mock/db'

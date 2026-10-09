@@ -1,6 +1,5 @@
 import type { NavItem } from '../routes/navigation'
 
-/** Vista pendiente: se sustituye por la real en su HU. */
 export default function PlaceholderPage({ item }: { item: NavItem }) {
   return (
     <>

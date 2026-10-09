@@ -5,17 +5,13 @@ import type { DiningTable, TableLocation, TableStatus } from '../api/types'
 import { TABLE_LOCATION_LABEL, TABLE_LOCATIONS, TABLE_STATUS_LABEL, TABLE_STATUSES } from '../utils/labels'
 
 interface Props {
-  /** Mesa a editar; sin ella, el formulario crea una nueva. */
   table?: DiningTable
-  /** Número propuesto para una mesa nueva. */
   suggestedNumber?: number
   onSaved: (table: DiningTable) => void
   onCancel: () => void
 }
 
-/** Alta y edición de una mesa (admin). */
 export default function TableForm({ table, suggestedNumber = 1, onSaved, onCancel }: Props) {
-  // Texto tal cual de los campos numéricos, para poder borrarlos y escribir otro número
   const [number, setNumber] = useState(String(table?.number ?? suggestedNumber))
   const [capacity, setCapacity] = useState(String(table?.capacity ?? 4))
   const [location, setLocation] = useState<TableLocation>(table?.location ?? 'indoor')

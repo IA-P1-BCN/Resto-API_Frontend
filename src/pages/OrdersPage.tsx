@@ -13,7 +13,6 @@ import { ORDER_STATUS_LABEL, ORDER_STATUSES } from '../utils/labels'
 
 type Filter = 'active' | 'all' | OrderStatus
 
-/** Comandas por mesa: crear pedidos, cancelarlos y cobrarlos (admin y waiter). */
 export default function OrdersPage() {
   const { user } = useAuth()
   const [filter, setFilter] = useState<Filter>('active')

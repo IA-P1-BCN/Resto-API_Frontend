@@ -1,4 +1,3 @@
-// Carta, mesas y reservas en modo simulado (HU-13, A-07).
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { mockServer } from '../api/mock/server'

@@ -1,4 +1,3 @@
-// Textos en castellano para los valores que devuelve la API.
 import type { OrderStatus, ReservationStatus, TableLocation, TableStatus } from '../api/types'
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {

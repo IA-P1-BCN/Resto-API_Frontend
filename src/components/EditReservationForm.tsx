@@ -16,12 +16,10 @@ interface Props {
   onCancel: () => void
 }
 
-/** Edición de una reserva por el personal: fecha, hora, personas, mesa, notas y estado. */
 export default function EditReservationForm({ reservation, onSaved, onCancel }: Props) {
   const tables = useQuery(listTables)
   const [date, setDate] = useState(reservation.reserved_at.slice(0, 10))
   const [time, setTime] = useState(reservation.reserved_at.slice(11, 16))
-  // Texto tal cual del campo, para poder borrarlo y escribir otro número
   const [partySize, setPartySize] = useState(String(reservation.party_size))
   const [tableId, setTableId] = useState(String(reservation.table_id))
   const [notes, setNotes] = useState(reservation.notes ?? '')

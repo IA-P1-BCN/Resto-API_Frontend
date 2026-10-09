@@ -1,4 +1,3 @@
-// Servicios contra la API (simulada a nivel HTTP): rutas, parámetros y cuerpos del contrato del backend.
 import { describe, expect, it, vi } from 'vitest'
 import { listAllDishes, listCategories, listDishes } from '../api/menu'
 import { createOrder, listOrders, updateOrderStatus } from '../api/orders'

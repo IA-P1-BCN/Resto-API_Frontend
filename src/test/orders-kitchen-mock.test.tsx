@@ -1,4 +1,3 @@
-// Pedidos y cocina en tiempo real en modo simulado (HU-13, A-08).
 import { screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { db } from '../api/mock/db'
@@ -13,7 +12,6 @@ function loginAs(role: keyof typeof TOKEN) {
   localStorage.setItem('restoapi.token', TOKEN[role])
 }
 
-/** Platos de un pedido en la tabla de Pedidos, uno por línea. */
 async function orderLines(id: number) {
   const list = await screen.findByRole('list', { name: `Platos del pedido ${id}` })
   return within(list)

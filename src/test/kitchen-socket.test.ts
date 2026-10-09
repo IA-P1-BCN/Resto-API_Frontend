@@ -1,4 +1,3 @@
-// WebSocket de cocina: eventos, reconexión con espera creciente y consulta periódica sin conexión.
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { connectKitchen, kitchenSocketUrl } from '../api/kitchenSocket'
@@ -68,7 +67,6 @@ describe('cliente WebSocket de cocina', () => {
     latest().simulateOpen()
     expect(onStatus).toHaveBeenLastCalledWith('open')
 
-    // Formato de la API (HU-08): el pedido llega incompleto
     const created = { event: 'order_created', order: { id: 9, table_id: 3, status: 'pending', total: '12.00' } }
     const changed = { event: 'order_status_changed', order: { id: 9, table_id: 3, status: 'in_kitchen' } }
     latest().simulateMessage(created)
@@ -103,7 +101,6 @@ describe('cliente WebSocket de cocina', () => {
     vi.advanceTimersByTime(1)
     expect(FakeWebSocket.instances).toHaveLength(3)
 
-    // Tras conectar bien, la espera vuelve a empezar en 1 s
     latest().simulateOpen()
     latest().simulateDrop()
     vi.advanceTimersByTime(1000)
@@ -132,7 +129,6 @@ describe('useKitchenFeed', () => {
 
     const { result } = renderHook(() => useKitchenFeed())
     await act(() => vi.advanceTimersByTimeAsync(0))
-    // Una petición por estado: pending e in_kitchen
     expect(orderRequests()).toBe(2)
     expect(requests.map((r) => r.params.status)).toEqual(['pending', 'in_kitchen'])
     expect(result.current.orders).toEqual([ORDER])
@@ -149,7 +145,6 @@ describe('useKitchenFeed', () => {
     await act(() => vi.advanceTimersByTimeAsync(POLL_MS * 3))
     expect(orderRequests()).toBe(6)
 
-    // Pedido nuevo: el evento no trae created_at ni notas, así que se recarga por HTTP
     const order10: Order = { ...ORDER, id: 10, created_at: '2026-10-05T11:05:00' }
     serverOrders = [ORDER, order10]
     await act(async () => {
@@ -160,7 +155,6 @@ describe('useKitchenFeed', () => {
     expect(result.current.orders).toEqual([ORDER, order10])
     expect(result.current.newIds.has(10)).toBe(true)
 
-    // Cambio de estado: se aplica al momento y después se recarga
     serverOrders = [order10]
     await act(async () => {
       latest().simulateMessage({ event: 'order_status_changed', order: { id: 9, status: 'served' } })

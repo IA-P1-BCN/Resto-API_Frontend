@@ -5,17 +5,14 @@ import type { Category, Dish } from '../api/types'
 
 interface Props {
   categories: Category[]
-  /** Plato a editar; sin él, el formulario crea uno nuevo. */
   dish?: Dish
   onSaved: (dish: Dish) => void
   onCancel: () => void
 }
 
-/** Alta y edición de un plato de la carta (admin). */
 export default function DishForm({ categories, dish, onSaved, onCancel }: Props) {
   const [name, setName] = useState(dish?.name ?? '')
   const [categoryId, setCategoryId] = useState(String(dish?.category_id ?? categories[0]?.id ?? ''))
-  // Texto tal cual del campo, para poder borrarlo y escribir otro importe
   const [price, setPrice] = useState(dish ? String(Number(dish.price)) : '')
   const [description, setDescription] = useState(dish?.description ?? '')
   const [allergens, setAllergens] = useState(dish?.allergens ?? '')
