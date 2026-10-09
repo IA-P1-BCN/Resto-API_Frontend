@@ -55,6 +55,18 @@ describe('login y navegación por rol (modo simulado)', () => {
     expect(screen.queryByRole('link', { name: 'Mesas' })).not.toBeInTheDocument()
   })
 
+  it('el botón muestra y oculta la contraseña', async () => {
+    const { user } = renderApp('/login')
+    const input = await screen.findByLabelText('Contraseña')
+    expect(input).toHaveAttribute('type', 'password')
+
+    await user.click(screen.getByRole('button', { name: 'Mostrar contraseña' }))
+    expect(input).toHaveAttribute('type', 'text')
+
+    await user.click(screen.getByRole('button', { name: 'Ocultar contraseña' }))
+    expect(input).toHaveAttribute('type', 'password')
+  })
+
   it('con contraseña incorrecta muestra un error y no entra', async () => {
     const { user } = renderApp('/login')
     await loginAs(user, 'admin@restoapi.dev', 'mala')
