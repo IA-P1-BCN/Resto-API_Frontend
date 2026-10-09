@@ -208,6 +208,37 @@ export const mockServer = {
     return { ...table }
   },
 
+  async createTable(data: Omit<DiningTable, 'id'>): Promise<DiningTable> {
+    await delay()
+    currentUser('admin')
+    if (db.tables.some((t) => t.number === data.number)) throw new Error(`Ya existe la mesa ${data.number}`)
+    const table: DiningTable = { id: nextId(db.tables), ...data }
+    db.tables.push(table)
+    return { ...table }
+  },
+
+  async updateTable(id: number, data: Omit<DiningTable, 'id'>): Promise<DiningTable> {
+    await delay()
+    currentUser('admin')
+    const table = db.tables.find((t) => t.id === id)
+    if (!table) throw new Error('Mesa no encontrada')
+    if (db.tables.some((t) => t.id !== id && t.number === data.number)) {
+      throw new Error(`Ya existe la mesa ${data.number}`)
+    }
+    Object.assign(table, data)
+    return { ...table }
+  },
+
+  async deleteTable(id: number): Promise<void> {
+    await delay()
+    currentUser('admin')
+    if (!db.tables.some((t) => t.id === id)) throw new Error('Mesa no encontrada')
+    if (db.orders.some((o) => o.table_id === id) || db.reservations.some((r) => r.table_id === id)) {
+      throw new Error('La mesa tiene pedidos o reservas: márcala como fuera de servicio en lugar de borrarla')
+    }
+    db.tables = db.tables.filter((t) => t.id !== id)
+  },
+
   async listAvailableTables(reservedAt: string, partySize: number): Promise<Page<DiningTable>> {
     await delay()
     currentUser('admin', 'waiter')
