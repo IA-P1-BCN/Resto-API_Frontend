@@ -1,6 +1,6 @@
 name: ci
 
-# Lint + tests + build en cada PR a dev/main y en cada push a dev.
+# Lint + tests + build (y la imagen Docker) en cada PR a dev/main y en cada push a dev.
 # El deploy lo hace Vercel con su integración de Git (producción desde main, preview por PR).
 
 on:
@@ -31,3 +31,6 @@ jobs:
         run: npm test
       - name: Build (tsc + Vite)
         run: npm run build
+      - name: Build de la imagen Docker
+        if: hashFiles('Dockerfile') != ''
+        run: docker build -t restoapi-frontend .
