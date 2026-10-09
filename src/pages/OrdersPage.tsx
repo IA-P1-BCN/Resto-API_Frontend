@@ -125,7 +125,15 @@ export default function OrdersPage() {
                     <td>{o.id}</td>
                     <td>{tableNumbers.get(o.table_id) ?? o.table_id}</td>
                     <td>{formatTime(parseServerTimestamp(o.created_at))}</td>
-                    <td>{o.items.map((i) => `${i.quantity}× ${dishLabel(i.dish_id, dishNames)}`).join(', ')}</td>
+                    <td className="order-items-cell">
+                      <ul className="order-items" aria-label={`Platos del pedido ${o.id}`}>
+                        {o.items.map((i) => (
+                          <li key={i.id}>
+                            {i.quantity}× {dishLabel(i.dish_id, dishNames)}
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
                     <td>{formatPrice(o.total)}</td>
                     <td>
                       <span className={`chip order-${o.status}`}>{ORDER_STATUS_LABEL[o.status]}</span>
