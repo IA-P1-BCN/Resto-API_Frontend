@@ -1,0 +1,257 @@
+// API simulada (VITE_USE_MOCK=true): mismas respuestas y reglas que el backend
+// (permisos, solapamiento de reservas, platos no disponibles, estados de pedido).
+import { toServerTimestamp } from '../../utils/format'
+import { mockUserFromToken } from '../mockAuth'
+import { VALID_TRANSITIONS } from '../orderRules'
+import { tokenStorage } from '../tokenStorage'
+import type {
+  Category,
+  DiningTable,
+  Dish,
+  Order,
+  OrderCreate,
+  OrderItem,
+  OrderStatus,
+  Page,
+  Reservation,
+  ReservationCreate,
+  Role,
+  TableStatus,
+} from '../types'
+import { db, DEFAULT_DURATION_MIN, endsAt } from './db'
+import { mockEvents } from './events'
+
+const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms))
+
+function paginate<T>(items: T[], page: number, size: number): Page<T> {
+  const start = (page - 1) * size
+  return { items: items.slice(start, start + size), total: items.length, page, size }
+}
+
+function currentUser(...roles: Role[]) {
+  const user = mockUserFromToken(tokenStorage.get())
+  if (!user) throw new Error('Sesión no válida')
+  if (roles.length > 0 && !roles.includes(user.role)) throw new Error('No tienes permiso para esta acción')
+  return user
+}
+
+const isStaff = (role: Role) => role === 'admin' || role === 'waiter'
+
+function overlaps(startA: string, minutesA: number, startB: string, minutesB: number): boolean {
+  const a = new Date(startA).getTime()
+  const b = new Date(startB).getTime()
+  return a < b + minutesB * 60_000 && b < a + minutesA * 60_000
+}
+
+function isTableFree(tableId: number, reservedAt: string, durationMin: number): boolean {
+  return !db.reservations.some(
+    (r) =>
+      r.table_id === tableId &&
+      r.status === 'confirmed' &&
+      overlaps(r.reserved_at, r.duration_min, reservedAt, durationMin),
+  )
+}
+
+export interface DishFilters {
+  category_id?: number
+  is_available?: boolean
+  max_price?: number
+  page?: number
+  size?: number
+}
+
+export interface ReservationFilters {
+  date?: string
+}
+
+export interface OrderFilters {
+  statuses?: OrderStatus[]
+  table_id?: number
+}
+
+function insertOrder(data: OrderCreate, waiterId: number): Order {
+  const table = db.tables.find((t) => t.id === data.table_id)
+  if (!table) throw new Error('Mesa no encontrada')
+  if (data.items.length === 0) throw new Error('El pedido no tiene platos')
+  const items: OrderItem[] = data.items.map((i) => {
+    const dish = db.dishes.find((d) => d.id === i.dish_id)
+    if (!dish || !dish.is_available) throw new Error(`"${dish?.name ?? `Plato ${i.dish_id}`}" no está disponible`)
+    if (i.quantity < 1) throw new Error('La cantidad debe ser al menos 1')
+    return {
+      id: db.nextOrderItemId++,
+      dish_id: dish.id,
+      quantity: i.quantity,
+      unit_price: dish.price,
+      notes: i.notes?.trim() || null,
+    }
+  })
+  const order: Order = {
+    id: db.nextOrderId++,
+    table_id: table.id,
+    waiter_id: waiterId,
+    status: 'pending',
+    total: items.reduce((t, i) => t + i.quantity * Number(i.unit_price), 0).toFixed(2),
+    created_at: toServerTimestamp(new Date()),
+    updated_at: null,
+    items,
+  }
+  db.orders.push(order)
+  // Mismo contenido que envía la API: sin created_at ni notas
+  mockEvents.emit({
+    event: 'order_created',
+    order: {
+      id: order.id,
+      table_id: order.table_id,
+      waiter_id: order.waiter_id,
+      status: order.status,
+      total: order.total,
+    },
+  })
+  return structuredClone(order)
+}
+
+export const mockServer = {
+  async listCategories(): Promise<Category[]> {
+    await delay()
+    currentUser()
+    return [...db.categories].sort((a, b) => a.sort_order - b.sort_order)
+  },
+
+  async listDishes({ category_id, is_available, max_price, page = 1, size = 12 }: DishFilters): Promise<Page<Dish>> {
+    await delay()
+    currentUser()
+    const items = db.dishes.filter(
+      (d) =>
+        (category_id === undefined || d.category_id === category_id) &&
+        (is_available === undefined || d.is_available === is_available) &&
+        (max_price === undefined || Number(d.price) <= max_price),
+    )
+    return paginate(structuredClone(items), page, size)
+  },
+
+  async listTables(): Promise<Page<DiningTable>> {
+    await delay()
+    currentUser('admin', 'waiter')
+    return paginate(structuredClone(db.tables), 1, 100)
+  },
+
+  async updateTableStatus(id: number, status: TableStatus): Promise<DiningTable> {
+    await delay()
+    currentUser('admin', 'waiter')
+    const table = db.tables.find((t) => t.id === id)
+    if (!table) throw new Error('Mesa no encontrada')
+    table.status = status
+    return { ...table }
+  },
+
+  async listAvailableTables(reservedAt: string, partySize: number): Promise<Page<DiningTable>> {
+    await delay()
+    currentUser('admin', 'waiter')
+    const items = db.tables
+      .filter(
+        (t) =>
+          t.status !== 'out_of_service' &&
+          t.capacity >= partySize &&
+          isTableFree(t.id, reservedAt, DEFAULT_DURATION_MIN),
+      )
+      .sort((a, b) => a.capacity - b.capacity || a.id - b.id)
+    return paginate(structuredClone(items), 1, 100)
+  },
+
+  async listReservations({ date }: ReservationFilters): Promise<Page<Reservation>> {
+    await delay()
+    const user = currentUser('admin', 'waiter', 'customer')
+    const items = db.reservations
+      .filter((r) => isStaff(user.role) || r.user_id === user.id)
+      .filter((r) => !date || r.reserved_at.startsWith(date))
+      .sort((a, b) => a.reserved_at.localeCompare(b.reserved_at))
+    return paginate(structuredClone(items), 1, 100)
+  },
+
+  async createReservation(data: ReservationCreate): Promise<Reservation> {
+    await delay()
+    const user = currentUser('admin', 'waiter', 'customer')
+    const table = db.tables.find((t) => t.id === data.table_id)
+    if (!table) throw new Error('Mesa no encontrada')
+    if (data.party_size > table.capacity) {
+      throw new Error(`La mesa ${table.number} es para ${table.capacity} personas como máximo`)
+    }
+    const duration = data.duration_min ?? DEFAULT_DURATION_MIN
+    if (!isTableFree(table.id, data.reserved_at, duration)) {
+      throw new Error(`La mesa ${table.number} ya tiene una reserva en ese horario`)
+    }
+    const reservation: Reservation = {
+      id: db.nextReservationId++,
+      user_id: user.id,
+      table_id: table.id,
+      reserved_at: data.reserved_at,
+      duration_min: duration,
+      ends_at: endsAt(data.reserved_at, duration),
+      party_size: data.party_size,
+      status: 'confirmed',
+      notes: data.notes?.trim() || null,
+      created_at: toServerTimestamp(new Date()),
+    }
+    db.reservations.push(reservation)
+    return structuredClone(reservation)
+  },
+
+  async cancelReservation(id: number): Promise<Reservation> {
+    await delay()
+    const user = currentUser('admin', 'waiter', 'customer')
+    const reservation = db.reservations.find((r) => r.id === id)
+    if (!reservation) throw new Error('Reserva no encontrada')
+    if (!isStaff(user.role) && reservation.user_id !== user.id) throw new Error('Solo puedes cancelar tus reservas')
+    if (reservation.status !== 'confirmed') throw new Error('Solo se pueden cancelar reservas confirmadas')
+    reservation.status = 'cancelled'
+    return structuredClone(reservation)
+  },
+
+  async listOrders({ statuses, table_id }: OrderFilters = {}): Promise<Order[]> {
+    await delay()
+    currentUser('admin', 'waiter', 'kitchen')
+    const items = db.orders
+      .filter((o) => !statuses || statuses.includes(o.status))
+      .filter((o) => table_id === undefined || o.table_id === table_id)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id - b.id)
+    return structuredClone(items)
+  },
+
+  async createOrder(data: OrderCreate): Promise<Order> {
+    await delay()
+    const user = currentUser('admin', 'waiter')
+    return insertOrder(data, user.id)
+  },
+
+  async updateOrderStatus(id: number, status: OrderStatus): Promise<Order> {
+    await delay()
+    currentUser('admin', 'waiter', 'kitchen')
+    const order = db.orders.find((o) => o.id === id)
+    if (!order) throw new Error('Pedido no encontrado')
+    if (order.status !== status) {
+      if (!VALID_TRANSITIONS[order.status].includes(status)) {
+        throw new Error(`No se puede pasar un pedido de "${order.status}" a "${status}"`)
+      }
+      order.status = status
+      order.updated_at = toServerTimestamp(new Date())
+      mockEvents.emit({
+        event: 'order_status_changed',
+        order: { id: order.id, table_id: order.table_id, status: order.status, total: order.total },
+      })
+    }
+    return structuredClone(order)
+  },
+
+  /** Solo modo simulado: crea un pedido al azar como si llegara de sala. */
+  async simulateWaiterOrder(): Promise<Order> {
+    await delay(100)
+    const available = db.dishes.filter((d) => d.is_available)
+    const tables = db.tables.filter((t) => t.status !== 'out_of_service')
+    const pick = <T,>(list: T[]) => list[Math.floor(Math.random() * list.length)]
+    const items = Array.from({ length: 1 + Math.floor(Math.random() * 3) }, () => ({
+      dish_id: pick(available).id,
+      quantity: 1 + Math.floor(Math.random() * 2),
+    }))
+    return insertOrder({ table_id: pick(tables).id, items }, 2)
+  },
+}

@@ -11,6 +11,12 @@
   --color-warning-bg: #fff4d6;
   --color-warning-text: #7a5600;
   --color-error: #b3261e;
+  --color-success-bg: #e3f4e6;
+  --color-success-text: #1e6b2f;
+  --color-danger-bg: #fbe4e2;
+  --color-danger-text: #9a2318;
+  --color-neutral-bg: #ece8e6;
+  --color-neutral-text: #5a514d;
   --radius: 8px;
 
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -33,6 +39,12 @@
     --color-warning-bg: #3a2f12;
     --color-warning-text: #f2d48a;
     --color-error: #ff8a80;
+    --color-success-bg: #173322;
+    --color-success-text: #9fdcae;
+    --color-danger-bg: #3d1c19;
+    --color-danger-text: #f5a59c;
+    --color-neutral-bg: #34302e;
+    --color-neutral-text: #c9bfba;
   }
 }
 
@@ -285,5 +297,452 @@ input {
 
   .content {
     padding: 1rem;
+  }
+}
+
+/* --- Vistas (HU-13): elementos comunes --- */
+h2 {
+  font-size: 1.15rem;
+  margin: 1.5rem 0 0.75rem;
+}
+
+h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+
+ul.cards,
+ul.summary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+select {
+  font: inherit;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.filters,
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1.25rem;
+}
+
+.filters label,
+.toolbar label {
+  min-width: 160px;
+}
+
+label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding-bottom: 0.55rem;
+}
+
+.btn-small {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.error-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-error);
+  margin-bottom: 1rem;
+}
+
+.banner-success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
+  width: fit-content;
+}
+
+.chip-warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  font-weight: 600;
+}
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.pagination .muted {
+  margin: 0;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.price {
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+td:nth-last-child(2) {
+  white-space: normal;
+  min-width: 160px;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* --- Carta --- */
+.dish {
+  display: grid;
+  gap: 0.4rem;
+  align-content: start;
+}
+
+.dish .muted,
+.dish-description {
+  margin: 0;
+}
+
+.dish-unavailable {
+  opacity: 0.65;
+}
+
+/* --- Mesas --- */
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.table-card {
+  display: grid;
+  gap: 0.6rem;
+  border-left-width: 5px;
+}
+
+.table-available {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.table-occupied {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+.table-reserved {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.table-out_of_service {
+  background: var(--color-neutral-bg);
+  color: var(--color-neutral-text);
+}
+
+.table-border-available {
+  border-left-color: var(--color-success-text);
+}
+
+.table-border-occupied {
+  border-left-color: var(--color-danger-text);
+}
+
+.table-border-reserved {
+  border-left-color: var(--color-warning-text);
+}
+
+.table-border-out_of_service {
+  border-left-color: var(--color-neutral-text);
+}
+
+/* --- Reservas --- */
+.reservation-form,
+.order-form {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.reservation-form h2,
+.order-form h2 {
+  margin: 0;
+}
+
+.reservation-form .filters {
+  margin-bottom: 0;
+}
+
+.row-cancelled td {
+  color: var(--color-muted);
+}
+
+.reservation-confirmed {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.reservation-cancelled {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+/* --- Pedidos --- */
+.order-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.menu-group + .menu-group {
+  margin-top: 1rem;
+}
+
+.quick-menu,
+.draft-lines,
+.ticket-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.quick-menu {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+
+.btn-dish {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.ticket-draft {
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.draft-lines li {
+  display: grid;
+  gap: 0.35rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.draft-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quantity {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.quantity output {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.draft-total {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.75rem 0 0;
+  font-size: 1.1rem;
+}
+
+.row-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.order-pending {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.order-in_kitchen {
+  background: var(--color-info-bg);
+  color: var(--color-info-text);
+}
+
+.order-served,
+.order-paid {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.order-cancelled {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+/* --- Cocina --- */
+.kitchen-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.connection {
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.connection-open {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.connection-connecting {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.connection-closed {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.kanban-col {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.kanban-col h2 {
+  margin: 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ticket {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.ticket-new {
+  border-color: var(--color-warning-text);
+  box-shadow: 0 0 0 2px var(--color-warning-bg);
+}
+
+.ticket-header {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.ticket-lines li {
+  display: grid;
+  font-size: 1.05rem;
+}
+
+.ticket-note {
+  color: var(--color-warning-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .order-grid,
+  .kanban {
+    grid-template-columns: 1fr;
   }
 }

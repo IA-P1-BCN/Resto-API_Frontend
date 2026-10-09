@@ -57,15 +57,36 @@ Con `VITE_USE_MOCK=true` en el `.env`, el login funciona con usuarios de prueba 
 
 En la pantalla de login hay un botón por rol que rellena las credenciales. **En Vercel debe ser `false`.**
 
+Los datos simulados (carta, mesas, reservas y pedidos) siguen las mismas reglas que la API y se reinician al recargar la página. En la vista **Cocina**, el botón *Simular pedido de sala* crea un pedido que aparece al instante, como si llegara por el WebSocket.
+
+### Vistas (HU-13)
+
+| Vista | Roles | Endpoints |
+|---|---|---|
+| Carta | todos | `GET /categories/`, `GET /dishes/` (filtros y paginación) |
+| Mesas | admin, waiter | `GET /tables`, `PATCH /tables/{id}/status` |
+| Reservas | admin, waiter, customer (solo las suyas) | `GET/POST /reservations`, `PATCH /reservations/{id}/cancel`, `GET /tables/available` |
+| Pedidos | admin, waiter | `GET/POST /orders/`, `PATCH /orders/{id}/status` |
+| Cocina | admin, kitchen | `GET /orders/`, `PATCH /orders/{id}/status`, `WS /ws/kitchen` |
+
+Buscar mesas libres es solo para admin y waiter, así que el cliente ve y cancela sus reservas pero no crea reservas nuevas desde la web.
+
+### Tiempo real (cocina)
+
+La vista de cocina se conecta a `ws(s)://<API>/ws/kitchen?token=<JWT>` y escucha los eventos `order_created` y `order_status_changed` (`{"event": ..., "order": {...}}`). Como el pedido del evento llega incompleto (sin hora ni notas), cada evento recarga la lista con `GET /orders/`; los cambios de estado se aplican además al momento. Si la conexión se cae, reintenta con espera creciente (1 s, 2 s, 4 s… hasta 30 s) y, mientras tanto, consulta `GET /orders/` cada 10 s.
+
 ### Estructura
 
 ```text
 src/
-├── api/          # Cliente axios (interceptor JWT), auth, errores, modo simulado
-├── components/   # Layout, rutas protegidas, aviso de "despertando el servidor"
+├── api/          # Cliente axios (interceptor JWT) y un servicio por recurso (auth, menu, tables, reservations, orders)
+│   └── mock/     # Modo simulado: datos de prueba (db.ts) y reglas de la API (server.ts)
+├── components/   # Layout, rutas protegidas, paginación, formularios de reserva y pedido
 ├── context/      # AuthContext / AuthProvider / useAuth
-├── pages/        # Login, panel, 403, 404 y vistas provisionales
+├── hooks/        # useQuery (carga de datos), useKitchenFeed (cocina en tiempo real)
+├── pages/        # Login, panel, carta, mesas, reservas, pedidos, cocina, 403, 404
 ├── routes/       # Navegación por rol (matriz de permisos del plan, 5.4)
+├── utils/        # Formato de precios y fechas, textos de los estados
 └── test/         # Tests de Vitest
 ```
 
