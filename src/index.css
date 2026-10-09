@@ -124,6 +124,42 @@ input {
   margin: 0;
 }
 
+.field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+/* Contraseña con botón "Mostrar / Ocultar" dentro del campo */
+.password-field {
+  position: relative;
+  display: grid;
+}
+
+.password-field input {
+  padding-right: 5.5rem;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-primary);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
 /* --- Tarjetas y avisos --- */
 .card {
   background: var(--color-surface);
