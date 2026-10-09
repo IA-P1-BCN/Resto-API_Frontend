@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react'
 import { getErrorMessage } from '../api/errors'
-import { cancelReservation, listReservations } from '../api/reservations'
+import { cancelReservation, deleteReservation, listReservations } from '../api/reservations'
 import type { DiningTable, Reservation } from '../api/types'
+import EditReservationForm from '../components/EditReservationForm'
 import ErrorMessage from '../components/ErrorMessage'
 import NewReservationForm from '../components/NewReservationForm'
 import { useAuth } from '../context/useAuth'
@@ -16,7 +17,7 @@ function when(reservation: Reservation): string {
 }
 
 /**
- * Sala: reservas del día, alta y cancelación.
+ * Sala: reservas del día, alta, edición, cancelación y borrado.
  * Cliente: sus reservas y cancelación (buscar mesas libres es solo para admin y waiter).
  */
 export default function ReservationsPage() {
@@ -28,6 +29,7 @@ export default function ReservationsPage() {
   const [notice, setNotice] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [cancellingId, setCancellingId] = useState<number | null>(null)
+  const [editing, setEditing] = useState<Reservation | null>(null)
 
   const fetchReservations = useCallback(() => listReservations(isCustomer ? {} : { date }), [isCustomer, date])
   const reservations = useQuery(fetchReservations)
@@ -39,6 +41,32 @@ export default function ReservationsPage() {
     setNotice(`Reserva confirmada: ${when(reservation)}, mesa ${table.number}.`)
     setDate(reservation.reserved_at.slice(0, 10))
     reservations.reload()
+  }
+
+  function handleEdited(reservation: Reservation) {
+    setEditing(null)
+    setActionError(null)
+    setNotice(`Reserva guardada: ${when(reservation)}.`)
+    setDate(reservation.reserved_at.slice(0, 10))
+    reservations.reload()
+  }
+
+  async function handleDelete(reservation: Reservation) {
+    const question = `¿Borrar definitivamente la reserva del ${when(reservation)}? Si solo no vienen, mejor cancélala.`
+    if (!window.confirm(question)) return
+    setCancellingId(reservation.id)
+    setActionError(null)
+    setNotice(null)
+    try {
+      await deleteReservation(reservation.id)
+      if (editing?.id === reservation.id) setEditing(null)
+      setNotice(`Reserva del ${when(reservation)} borrada.`)
+      reservations.reload()
+    } catch (error) {
+      setActionError(getErrorMessage(error))
+    } finally {
+      setCancellingId(null)
+    }
   }
 
   async function handleCancel(reservation: Reservation) {
@@ -76,6 +104,7 @@ export default function ReservationsPage() {
               className="btn"
               onClick={() => {
                 setFormOpen(true)
+                setEditing(null)
                 setNotice(null)
               }}
             >
@@ -87,6 +116,15 @@ export default function ReservationsPage() {
 
       {formOpen && (
         <NewReservationForm initialDate={date} onCreated={handleCreated} onCancel={() => setFormOpen(false)} />
+      )}
+
+      {editing && (
+        <EditReservationForm
+          key={editing.id}
+          reservation={editing}
+          onSaved={handleEdited}
+          onCancel={() => setEditing(null)}
+        />
       )}
 
       {notice && (
@@ -130,7 +168,21 @@ export default function ReservationsPage() {
                         <span className={`chip reservation-${r.status}`}>{RESERVATION_STATUS_LABEL[r.status]}</span>
                       </td>
                       <td>{r.notes ?? '—'}</td>
-                      <td>
+                      <td className="row-actions">
+                        {!isCustomer && r.status !== 'cancelled' && (
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-small"
+                            onClick={() => {
+                              setEditing(r)
+                              setFormOpen(false)
+                              setNotice(null)
+                            }}
+                            aria-label={`Editar reserva de las ${formatTime(start)}`}
+                          >
+                            Editar
+                          </button>
+                        )}
                         {r.status === 'confirmed' && (
                           <button
                             type="button"
@@ -140,6 +192,17 @@ export default function ReservationsPage() {
                             aria-label={`Cancelar reserva de las ${formatTime(start)}`}
                           >
                             Cancelar
+                          </button>
+                        )}
+                        {!isCustomer && (
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-small"
+                            disabled={cancellingId === r.id}
+                            onClick={() => handleDelete(r)}
+                            aria-label={`Borrar reserva de las ${formatTime(start)}`}
+                          >
+                            Borrar
                           </button>
                         )}
                       </td>

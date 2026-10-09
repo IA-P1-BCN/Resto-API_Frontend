@@ -15,6 +15,7 @@ import type {
   Page,
   Reservation,
   ReservationCreate,
+  ReservationUpdate,
   Role,
   TableStatus,
 } from '../types'
@@ -43,9 +44,10 @@ function overlaps(startA: string, minutesA: number, startB: string, minutesB: nu
   return a < b + minutesB * 60_000 && b < a + minutesA * 60_000
 }
 
-function isTableFree(tableId: number, reservedAt: string, durationMin: number): boolean {
+function isTableFree(tableId: number, reservedAt: string, durationMin: number, excludeId?: number): boolean {
   return !db.reservations.some(
     (r) =>
+      r.id !== excludeId &&
       r.table_id === tableId &&
       r.status === 'confirmed' &&
       overlaps(r.reserved_at, r.duration_min, reservedAt, durationMin),
@@ -205,6 +207,38 @@ export const mockServer = {
     if (reservation.status !== 'confirmed') throw new Error('Solo se pueden cancelar reservas confirmadas')
     reservation.status = 'cancelled'
     return structuredClone(reservation)
+  },
+
+  async updateReservation(id: number, changes: ReservationUpdate): Promise<Reservation> {
+    await delay()
+    const user = currentUser('admin', 'waiter', 'customer')
+    const reservation = db.reservations.find((r) => r.id === id)
+    if (!reservation) throw new Error('Reserva no encontrada')
+    if (!isStaff(user.role) && reservation.user_id !== user.id) throw new Error('Solo puedes editar tus reservas')
+    if (changes.status !== undefined && !isStaff(user.role)) {
+      throw new Error('Solo admin y waiter pueden cambiar el estado de una reserva')
+    }
+    const next = { ...reservation, ...changes }
+    const table = db.tables.find((t) => t.id === next.table_id)
+    if (!table) throw new Error('Mesa no encontrada')
+    if (next.party_size > table.capacity) {
+      throw new Error(`La mesa ${table.number} es para ${table.capacity} personas como máximo`)
+    }
+    const moved = changes.table_id !== undefined || changes.reserved_at !== undefined
+    if (moved && next.status !== 'cancelled' && !isTableFree(table.id, next.reserved_at, next.duration_min, id)) {
+      throw new Error(`La mesa ${table.number} ya tiene una reserva en ese horario`)
+    }
+    Object.assign(reservation, next, { ends_at: endsAt(next.reserved_at, next.duration_min) })
+    return structuredClone(reservation)
+  },
+
+  async deleteReservation(id: number): Promise<void> {
+    await delay()
+    const user = currentUser('admin', 'waiter', 'customer')
+    const reservation = db.reservations.find((r) => r.id === id)
+    if (!reservation) throw new Error('Reserva no encontrada')
+    if (!isStaff(user.role) && reservation.user_id !== user.id) throw new Error('Solo puedes borrar tus reservas')
+    db.reservations = db.reservations.filter((r) => r.id !== id)
   },
 
   async listOrders({ statuses, table_id }: OrderFilters = {}): Promise<Order[]> {
