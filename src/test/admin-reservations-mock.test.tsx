@@ -2,6 +2,7 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { db } from '../api/mock/db'
 import { toISODate } from '../utils/format'
+import { answerConfirm } from './confirmDialog'
 import { renderApp } from './renderApp'
 
 vi.mock('../config', () => ({ USE_MOCK: true, API_URL: 'http://api.test' }))
@@ -85,9 +86,9 @@ describe('Reservas: edición y borrado (personal)', () => {
 
   it('borra una reserva tras confirmarlo', async () => {
     loginAs('admin')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const { user } = renderApp('/reservas')
     await user.click(await screen.findByRole('button', { name: 'Borrar reserva de las 13:30' }))
+    await answerConfirm(user, 'Borrar')
 
     expect(await screen.findByRole('status')).toHaveTextContent('borrada')
     await waitFor(() => expect(screen.queryByRole('button', { name: 'Borrar reserva de las 13:30' })).not.toBeInTheDocument())

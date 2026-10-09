@@ -6,6 +6,7 @@ import type { Order, OrderStatus } from '../api/types'
 import ErrorMessage from '../components/ErrorMessage'
 import NewOrderForm from '../components/NewOrderForm'
 import { useAuth } from '../context/useAuth'
+import { useConfirm } from '../context/useConfirm'
 import { dishLabel, tableLabel, useDishNames, useTableNumbers } from '../hooks/useLookups'
 import { useQuery } from '../hooks/useQuery'
 import { formatPrice, formatTime, parseServerTimestamp } from '../utils/format'
@@ -15,6 +16,7 @@ type Filter = 'active' | 'all' | OrderStatus
 
 export default function OrdersPage() {
   const { user } = useAuth()
+  const confirm = useConfirm()
   const [filter, setFilter] = useState<Filter>('active')
   const [formOpen, setFormOpen] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
@@ -38,7 +40,10 @@ export default function OrdersPage() {
   }
 
   async function changeStatus(order: Order, status: OrderStatus) {
-    if (status === 'cancelled' && !window.confirm(`¿Cancelar el pedido #${order.id}?`)) return
+    if (status === 'cancelled') {
+      const confirmed = await confirm({ title: `¿Cancelar el pedido #${order.id}?`, confirmLabel: 'Cancelar pedido' })
+      if (!confirmed) return
+    }
     setChangingId(order.id)
     setActionError(null)
     setNotice(null)

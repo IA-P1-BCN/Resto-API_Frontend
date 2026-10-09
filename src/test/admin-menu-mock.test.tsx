@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { db } from '../api/mock/db'
+import { answerConfirm } from './confirmDialog'
 import { renderApp } from './renderApp'
 
 vi.mock('../config', () => ({ USE_MOCK: true, API_URL: 'http://api.test' }))
@@ -56,20 +57,20 @@ describe('Carta: gestión de platos (admin)', () => {
 
   it('el admin borra un plato tras confirmarlo', async () => {
     loginAs('admin')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const { user } = renderApp('/carta')
     await user.click(await screen.findByRole('button', { name: 'Borrar Pimientos de Padrón' }))
+    expect(await screen.findByRole('alertdialog', { name: '¿Borrar "Pimientos de Padrón" de la carta?' })).toBeInTheDocument()
+    await answerConfirm(user, 'Borrar')
 
     expect(await screen.findByRole('status')).toHaveTextContent('Plato "Pimientos de Padrón" borrado.')
     await waitFor(() => expect(screen.queryByText('Pimientos de Padrón')).not.toBeInTheDocument())
-    expect(window.confirm).toHaveBeenCalledWith('¿Borrar "Pimientos de Padrón" de la carta?')
   })
 
   it('si el plato está en un pedido no se borra y se explica por qué', async () => {
     loginAs('admin')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     const { user } = renderApp('/carta')
     await user.click(await screen.findByRole('button', { name: 'Borrar Croquetas de jamón' }))
+    await answerConfirm(user, 'Borrar')
 
     expect(await screen.findByRole('alert')).toHaveTextContent('márcalo como no disponible')
     expect(db.dishes.some((d) => d.id === 1)).toBe(true)
@@ -118,16 +119,17 @@ describe('Carta: gestión de categorías (admin)', () => {
 
   it('no deja borrar una categoría con platos, pero sí una vacía', async () => {
     loginAs('admin')
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
     db.categories.push({ id: 5, name: 'Temporada', sort_order: 5 })
     const { user } = renderApp('/carta')
     await user.click(await screen.findByRole('button', { name: 'Gestionar categorías' }))
     const section = await screen.findByRole('region', { name: 'Categorías' })
 
     await user.click(within(section).getByRole('button', { name: 'Borrar categoría Postres' }))
+    await answerConfirm(user, 'Borrar')
     expect(await within(section).findByRole('alert')).toHaveTextContent('La categoría tiene platos')
 
     await user.click(within(section).getByRole('button', { name: 'Borrar categoría Temporada' }))
+    await answerConfirm(user, 'Borrar')
     expect(await screen.findByRole('status')).toHaveTextContent('Categoría "Temporada" borrada.')
     await waitFor(() => expect(within(section).queryByText('Temporada')).not.toBeInTheDocument())
   })
