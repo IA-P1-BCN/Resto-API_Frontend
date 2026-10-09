@@ -13,11 +13,19 @@ function loginAs(role: keyof typeof TOKEN) {
   localStorage.setItem('restoapi.token', TOKEN[role])
 }
 
+/** Platos de un pedido en la tabla de Pedidos, uno por línea. */
+async function orderLines(id: number) {
+  const list = await screen.findByRole('list', { name: `Platos del pedido ${id}` })
+  return within(list)
+    .getAllByRole('listitem')
+    .map((li) => li.textContent)
+}
+
 describe('Pedidos (sala)', () => {
   it('el camarero crea un pedido con varias líneas y notas', async () => {
     loginAs('waiter')
     const { user } = renderApp('/pedidos')
-    await screen.findByText('2× Paella de marisco, 1× Ensalada de burrata, 2× Agua mineral')
+    expect(await orderLines(2)).toEqual(['2× Paella de marisco', '1× Ensalada de burrata', '2× Agua mineral'])
 
     await user.click(screen.getByRole('button', { name: '+ Nuevo pedido' }))
     const form = screen.getByRole('form', { name: 'Nuevo pedido' })
@@ -34,7 +42,7 @@ describe('Pedidos (sala)', () => {
     await user.click(within(form).getByRole('button', { name: 'Enviar a cocina' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent('Pedido #4 enviado a cocina (mesa 1')
-    expect(await screen.findByText('2× Croquetas de jamón, 1× Café')).toBeInTheDocument()
+    expect(await orderLines(4)).toEqual(['2× Croquetas de jamón', '1× Café'])
     const order = db.orders.find((o) => o.id === 4)!
     expect(order.total).toBe('18.80')
     expect(order.items[0]).toMatchObject({ dish_id: 1, quantity: 2, unit_price: '8.50', notes: 'Sin sal' })
@@ -78,7 +86,7 @@ describe('Pedidos (sala)', () => {
 
     await user.click(screen.getByRole('button', { name: 'Marcar pagado pedido 3' }))
     expect(await screen.findByRole('status')).toHaveTextContent('Pedido #3: pagado.')
-    await waitFor(() => expect(screen.queryByText('1× Croquetas de jamón, 2× Café')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.queryByRole('list', { name: 'Platos del pedido 3' })).not.toBeInTheDocument())
   })
 })
 
