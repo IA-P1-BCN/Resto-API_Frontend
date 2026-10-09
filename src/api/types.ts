@@ -93,6 +93,15 @@ export interface ReservationCreate {
   notes?: string
 }
 
+/** Edición parcial (PATCH): solo se envían los campos que cambian. Para cancelar hay otro endpoint. */
+export interface ReservationUpdate {
+  table_id?: number
+  reserved_at?: string
+  party_size?: number
+  notes?: string | null
+  status?: Exclude<ReservationStatus, 'cancelled'>
+}
+
 // --- Pedidos (HU-07 / HU-08) ---
 
 export type OrderStatus = 'pending' | 'in_kitchen' | 'served' | 'paid' | 'cancelled'
