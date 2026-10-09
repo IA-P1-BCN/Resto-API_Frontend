@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { serverStatus } from '../api/serverStatus'
 
-/** Aviso mientras Render despierta del cold start (riesgo R1). */
 export default function WakeUpBanner() {
   const waking = useSyncExternalStore(serverStatus.subscribe, serverStatus.isWaking)
   if (!waking) return null

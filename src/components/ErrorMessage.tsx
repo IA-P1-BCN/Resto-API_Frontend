@@ -1,4 +1,3 @@
-/** Error al cargar o guardar, con botón opcional para reintentar. */
 export default function ErrorMessage({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <div className="card error-card" role="alert">

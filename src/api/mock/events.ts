@@ -1,4 +1,3 @@
-// Sustituye al WebSocket de cocina en el modo simulado.
 import type { KitchenEvent } from '../types'
 
 type Listener = (event: KitchenEvent) => void

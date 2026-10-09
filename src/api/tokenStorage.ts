@@ -1,6 +1,3 @@
-// El token JWT se guarda en localStorage. Puede no estar disponible
-// (modo privado, almacenamiento bloqueado), por eso todo va en try/catch.
-
 const KEY = 'restoapi.token'
 
 export const tokenStorage = {

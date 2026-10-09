@@ -16,10 +16,6 @@ function when(reservation: Reservation): string {
   return `${formatDate(date)} a las ${formatTime(date)}`
 }
 
-/**
- * Sala: reservas del día, alta, edición, cancelación y borrado.
- * Cliente: sus reservas y cancelación (buscar mesas libres es solo para admin y waiter).
- */
 export default function ReservationsPage() {
   const { user } = useAuth()
   const isCustomer = user?.role === 'customer'

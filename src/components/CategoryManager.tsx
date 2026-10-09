@@ -6,13 +6,10 @@ import ErrorMessage from './ErrorMessage'
 
 interface Props {
   categories: Category[]
-  /** Se llama tras crear, editar o borrar una categoría, para recargar la carta. */
   onChanged: (message: string) => void
 }
 
-/** Alta, edición y borrado de las categorías de la carta (admin). */
 export default function CategoryManager({ categories, onChanged }: Props) {
-  // Las categorías nuevas van al final de la carta por defecto
   const nextSortOrder = Math.max(0, ...categories.map((c) => c.sort_order)) + 1
   const [editing, setEditing] = useState<Category | null>(null)
   const [name, setName] = useState('')
@@ -41,7 +38,6 @@ export default function CategoryManager({ categories, onChanged }: Props) {
         onChanged(`Categoría "${data.name}" creada.`)
       }
       startEdit(null)
-      // La lista aún no se ha recargado: la siguiente nueva va detrás de la que se acaba de guardar
       setSortOrder(String(Math.max(nextSortOrder, data.sort_order + 1)))
     } catch (err) {
       setError(getErrorMessage(err))

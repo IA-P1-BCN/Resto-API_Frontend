@@ -82,7 +82,6 @@ code {
   color: var(--color-muted);
 }
 
-/* --- Botones y formularios --- */
 .btn {
   border: 1px solid var(--color-primary);
   background: var(--color-primary);
@@ -129,7 +128,6 @@ input {
   gap: 0.3rem;
 }
 
-/* Contraseña con botón "Mostrar / Ocultar" dentro del campo */
 .password-field {
   position: relative;
   display: grid;
@@ -160,7 +158,6 @@ input {
   outline-offset: 1px;
 }
 
-/* --- Tarjetas y avisos --- */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -215,7 +212,6 @@ input {
   color: var(--color-warning-text);
 }
 
-/* --- Login --- */
 .login-page {
   min-height: 100vh;
   display: grid;
@@ -253,7 +249,6 @@ input {
   text-align: center;
 }
 
-/* --- Layout --- */
 .topbar {
   display: flex;
   flex-wrap: wrap;
@@ -336,7 +331,6 @@ input {
   }
 }
 
-/* --- Vistas (HU-13): elementos comunes --- */
 h2 {
   font-size: 1.15rem;
   margin: 1.5rem 0 0.75rem;
@@ -503,7 +497,6 @@ tbody tr:last-child td {
   border-bottom: none;
 }
 
-/* --- Carta --- */
 .dish {
   display: grid;
   gap: 0.4rem;
@@ -519,7 +512,6 @@ tbody tr:last-child td {
   opacity: 0.65;
 }
 
-/* --- Mesas --- */
 .summary {
   display: flex;
   flex-wrap: wrap;
@@ -568,7 +560,6 @@ tbody tr:last-child td {
   border-left-color: var(--color-neutral-text);
 }
 
-/* --- Reservas --- */
 .reservation-form,
 .order-form,
 .admin-form {
@@ -588,7 +579,6 @@ tbody tr:last-child td {
   margin-bottom: 0;
 }
 
-/* Listas de gestión (admin): nombre a la izquierda y botones a la derecha */
 .admin-list {
   list-style: none;
   margin: 0;
@@ -621,7 +611,6 @@ tbody tr:last-child td {
   color: var(--color-danger-text);
 }
 
-/* --- Pedidos --- */
 .order-grid {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
@@ -635,7 +624,6 @@ tbody tr:last-child td {
 
 .quick-menu,
 .draft-lines,
-/* Pedidos: un plato por línea para que las comandas largas no estiren la tabla */
 td.order-items-cell {
   white-space: normal;
   min-width: 180px;
@@ -736,7 +724,6 @@ td.order-items-cell {
   color: var(--color-danger-text);
 }
 
-/* --- Cocina --- */
 .kitchen-header {
   display: flex;
   flex-wrap: wrap;

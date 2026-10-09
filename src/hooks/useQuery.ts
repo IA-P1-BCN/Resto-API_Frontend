@@ -8,11 +8,6 @@ interface Result<T> {
   error?: string
 }
 
-/**
- * Carga datos con `fetcher` y los vuelve a pedir cuando cambia (debe ser estable:
- * una función de módulo o un useCallback) o al llamar a `reload`.
- * Mientras recarga se mantienen los datos anteriores para no hacer parpadear la vista.
- */
 export function useQuery<T>(fetcher: () => Promise<T>) {
   const [version, setVersion] = useState(0)
   const [result, setResult] = useState<Result<T>>({ version: -1 })

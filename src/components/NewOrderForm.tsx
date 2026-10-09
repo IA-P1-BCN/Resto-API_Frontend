@@ -21,7 +21,6 @@ interface Props {
   onCancel: () => void
 }
 
-/** Comanda: elegir mesa, añadir platos de la carta (solo disponibles) y enviar a cocina. */
 export default function NewOrderForm({ onCreated, onCancel }: Props) {
   const tables = useQuery(listTables)
   const categories = useQuery(listCategories)

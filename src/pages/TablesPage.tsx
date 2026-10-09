@@ -8,13 +8,8 @@ import { useAuth } from '../context/useAuth'
 import { useQuery } from '../hooks/useQuery'
 import { TABLE_LOCATION_LABEL, TABLE_LOCATIONS, TABLE_STATUS_LABEL, TABLE_STATUSES } from '../utils/labels'
 
-/** Formulario de mesa abierto: nueva o editando una. */
 type TableFormState = { mode: 'new' } | { mode: 'edit'; table: DiningTable } | null
 
-/**
- * Estado de la sala por zonas; sala puede cambiar el estado de cada mesa.
- * El admin además crea, edita y borra mesas.
- */
 export default function TablesPage() {
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'

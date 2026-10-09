@@ -1,15 +1,11 @@
-// Navegación por rol según la matriz de permisos del plan (sección 5.4).
-// Las mismas reglas protegen las rutas: un rol sin permiso ve la página 403.
 import type { Role } from '../api/types'
 
 export interface NavItem {
   path: string
   label: string
   roles: Role[]
-  /** Etiqueta distinta para algún rol (p. ej. el cliente ve "Mis reservas"). */
   labelByRole?: Partial<Record<Role, string>>
   description: string
-  /** HU que implementa la vista. */
   hu?: string
 }
 

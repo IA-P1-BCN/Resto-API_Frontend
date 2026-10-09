@@ -12,11 +12,9 @@ interface Props {
   onCancel: () => void
 }
 
-/** Alta de reserva en dos pasos: buscar mesas libres (HU-18) y confirmar. */
 export default function NewReservationForm({ initialDate, onCreated, onCancel }: Props) {
   const [date, setDate] = useState(initialDate)
   const [time, setTime] = useState('21:00')
-  // Texto tal cual del campo, para poder borrarlo y escribir otro número con el teclado
   const [partySizeInput, setPartySizeInput] = useState('2')
   const [notes, setNotes] = useState('')
   const [tables, setTables] = useState<DiningTable[] | null>(null)

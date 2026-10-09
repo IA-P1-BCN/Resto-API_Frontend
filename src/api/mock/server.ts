@@ -1,5 +1,3 @@
-// API simulada (VITE_USE_MOCK=true): mismas respuestas y reglas que el backend
-// (permisos, solapamiento de reservas, platos no disponibles, estados de pedido).
 import { toServerTimestamp } from '../../utils/format'
 import { mockUserFromToken } from '../mockAuth'
 import { VALID_TRANSITIONS } from '../orderRules'
@@ -100,7 +98,6 @@ function insertOrder(data: OrderCreate, waiterId: number): Order {
     items,
   }
   db.orders.push(order)
-  // Mismo contenido que envía la API: sin created_at ni notas
   mockEvents.emit({
     event: 'order_created',
     order: {
@@ -371,7 +368,6 @@ export const mockServer = {
     return structuredClone(order)
   },
 
-  /** Solo modo simulado: crea un pedido al azar como si llegara de sala. */
   async simulateWaiterOrder(): Promise<Order> {
     await delay(100)
     const available = db.dishes.filter((d) => d.is_available)

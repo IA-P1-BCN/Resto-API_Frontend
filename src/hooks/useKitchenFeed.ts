@@ -5,7 +5,6 @@ import { KITCHEN_STATUSES } from '../api/orderRules'
 import { listOrders } from '../api/orders'
 import type { Order, OrderStatus } from '../api/types'
 
-/** Sin WebSocket, se consulta GET /orders/ cada 10 s (plan B de la HU-08). */
 export const POLL_MS = 10_000
 
 function applyOrder(list: Order[] | null, order: Order): Order[] {
@@ -13,18 +12,11 @@ function applyOrder(list: Order[] | null, order: Order): Order[] {
   return KITCHEN_STATUSES.includes(order.status) ? [...rest, order] : rest
 }
 
-/** Cambia el estado de un pedido ya cargado (o lo quita si deja de ser de cocina). */
 function applyStatus(list: Order[] | null, id: number, status: OrderStatus): Order[] | null {
   const order = list?.find((o) => o.id === id)
   return order ? applyOrder(list, { ...order, status }) : list
 }
 
-/**
- * Pedidos por preparar en cocina: carga inicial por HTTP y, después, los eventos
- * del WebSocket. Cada evento se aplica al momento si se puede y, como el pedido
- * del evento llega incompleto, la lista se vuelve a pedir por HTTP.
- * Si la conexión no está abierta, se pide cada POLL_MS.
- */
 export function useKitchenFeed() {
   const [orders, setOrders] = useState<Order[] | null>(null)
   const [status, setStatus] = useState<ConnectionStatus>('connecting')
@@ -68,7 +60,6 @@ export function useKitchenFeed() {
     }
   }, [status, reloadKey])
 
-  /** Aplica la respuesta de un cambio de estado hecho desde esta pantalla. */
   const applyLocal = useCallback((order: Order) => {
     setOrders((list) => applyOrder(list, order))
     setNewIds((ids) => {

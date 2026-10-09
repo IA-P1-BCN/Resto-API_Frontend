@@ -15,7 +15,6 @@ import ReservationsPage from './pages/ReservationsPage'
 import TablesPage from './pages/TablesPage'
 import { NAV_ITEMS } from './routes/navigation'
 
-/** Vistas ya implementadas; el resto de NAV_ITEMS muestra la página provisional. */
 const PAGES: Record<string, ComponentType> = {
   '/carta': MenuPage,
   '/mesas': TablesPage,
@@ -25,7 +24,6 @@ const PAGES: Record<string, ComponentType> = {
 }
 
 export default function App() {
-  // Despierta la API en Render en cuanto se abre la web (riesgo R1)
   useEffect(() => {
     pingHealth()
   }, [])

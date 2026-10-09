@@ -1,4 +1,3 @@
-// Datos de prueba del modo simulado. Se reinician al recargar la página.
 import { toISODate, toServerTimestamp } from '../../utils/format'
 import type { Category, DiningTable, Dish, Order, OrderItem, Reservation } from '../types'
 
@@ -53,7 +52,6 @@ const TABLES: DiningTable[] = [
 
 export const DEFAULT_DURATION_MIN = 90
 
-/** Fin de la reserva, como el `ends_at` que calcula la API. */
 export function endsAt(reservedAt: string, durationMin: number): string {
   const end = new Date(new Date(reservedAt).getTime() + durationMin * 60_000)
   const hh = String(end.getHours()).padStart(2, '0')

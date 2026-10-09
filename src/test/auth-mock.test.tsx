@@ -1,4 +1,3 @@
-// Flujo completo de login y navegación por rol en modo simulado.
 import { screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { renderApp } from './renderApp'
@@ -34,7 +33,7 @@ describe('login y navegación por rol (modo simulado)', () => {
   })
 
   it('un rol sin permiso ve la página 403', async () => {
-    localStorage.setItem('restoapi.token', 'mock-token-2') // camarero
+    localStorage.setItem('restoapi.token', 'mock-token-2')
     renderApp('/usuarios')
     expect(await screen.findByRole('heading', { name: '403 · Sin acceso' })).toBeInTheDocument()
   })
@@ -75,7 +74,7 @@ describe('login y navegación por rol (modo simulado)', () => {
   })
 
   it('la sesión se restaura al recargar y se cierra con "Cerrar sesión"', async () => {
-    localStorage.setItem('restoapi.token', 'mock-token-1') // admin
+    localStorage.setItem('restoapi.token', 'mock-token-1')
     const { user } = renderApp('/')
     expect(await screen.findByRole('heading', { name: 'Hola, Admin Demo' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }))

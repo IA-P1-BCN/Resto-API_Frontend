@@ -17,7 +17,6 @@ const COLUMNS: { status: OrderStatus; title: string }[] = [
   { status: 'in_kitchen', title: 'En preparación' },
 ]
 
-/** Pantalla de cocina: pedidos por preparar en tiempo real (WebSocket con reconexión). */
 export default function KitchenPage() {
   const { user } = useAuth()
   const { orders, status, error, newIds, refresh, applyLocal } = useKitchenFeed()

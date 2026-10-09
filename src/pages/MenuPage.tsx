@@ -10,13 +10,8 @@ import { useAuth } from '../context/useAuth'
 import { useQuery } from '../hooks/useQuery'
 import { formatPrice, splitAllergens } from '../utils/format'
 
-/** Formulario de plato abierto: nuevo o editando uno. */
 type DishFormState = { mode: 'new' } | { mode: 'edit'; dish: Dish } | null
 
-/**
- * Carta con filtros por categoría, disponibilidad y precio máximo (todos los roles).
- * El admin además crea, edita y borra platos y categorías.
- */
 export default function MenuPage() {
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'

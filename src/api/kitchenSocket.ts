@@ -1,6 +1,3 @@
-// WebSocket de cocina (HU-08): `ws(s)://<API>/ws/kitchen?token=<JWT>`.
-// Eventos: `order_created` y `order_status_changed`.
-// Si la conexión se cae, reintenta con espera creciente (1 s, 2 s, 4 s… hasta 30 s).
 import { API_URL, USE_MOCK } from '../config'
 import { mockEvents } from './mock/events'
 import { tokenStorage } from './tokenStorage'
@@ -36,7 +33,6 @@ function isKitchenEvent(data: unknown): data is KitchenEvent {
   )
 }
 
-/** Abre la conexión y devuelve la función que la cierra (sin reintentos). */
 export function connectKitchen({ onEvent, onStatus }: Options): () => void {
   if (USE_MOCK) {
     onStatus('connecting')

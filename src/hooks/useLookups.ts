@@ -1,5 +1,3 @@
-// Los pedidos y las reservas solo traen ids (dish_id, table_id): estos hooks
-// cargan los nombres de los platos y los números de mesa para mostrarlos.
 import { useMemo } from 'react'
 import { listAllDishes } from '../api/menu'
 import { listTables } from '../api/tables'
@@ -13,7 +11,6 @@ export function useDishNames(): Map<number, string> {
   return useMemo(() => new Map((data ?? []).map((d) => [d.id, d.name])), [data])
 }
 
-/** Número de cada mesa. `/tables` es solo para admin y waiter: con otros roles queda vacío. */
 export function useTableNumbers(enabled: boolean): Map<number, number> {
   const { data } = useQuery(enabled ? listTables : noTables)
   return useMemo(() => new Map((data ?? []).map((t) => [t.id, t.number])), [data])
