@@ -1,41 +1,62 @@
-// Página provisional para validar el deploy en Vercel y la conexión con la API (CORS).
-// Se sustituye por el login y el panel en la HU-12.
-import { useEffect, useState } from 'react'
+import { useEffect, type ComponentType } from 'react'
+import { Route, Routes } from 'react-router-dom'
+import { pingHealth } from './api/auth'
+import Layout from './components/Layout'
+import { RequireAuth, RequireRole } from './components/ProtectedRoute'
+import WakeUpBanner from './components/WakeUpBanner'
+import { ConfirmProvider } from './context/ConfirmProvider'
+import DashboardPage from './pages/DashboardPage'
+import KitchenPage from './pages/KitchenPage'
+import LoginPage from './pages/LoginPage'
+import MenuPage from './pages/MenuPage'
+import NotFoundPage from './pages/NotFoundPage'
+import OrdersPage from './pages/OrdersPage'
+import PlaceholderPage from './pages/PlaceholderPage'
+import ReservationsPage from './pages/ReservationsPage'
+import TablesPage from './pages/TablesPage'
+import { NAV_ITEMS } from './routes/navigation'
 
-const API_URL = import.meta.env.VITE_API_URL
-
-type Estado = 'comprobando' | 'ok' | 'error'
-
-const mensajes: Record<Estado, string> = {
-  comprobando: '⏳ Comprobando la API… (en el plan gratuito de Render puede tardar ~50 s en despertar)',
-  ok: '✅ API conectada',
-  error: '❌ API no disponible',
+const PAGES: Record<string, ComponentType> = {
+  '/carta': MenuPage,
+  '/mesas': TablesPage,
+  '/reservas': ReservationsPage,
+  '/pedidos': OrdersPage,
+  '/cocina': KitchenPage,
 }
 
 export default function App() {
-  const [estado, setEstado] = useState<Estado>('comprobando')
-
   useEffect(() => {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 60_000)
-    fetch(`${API_URL}/health`, { signal: controller.signal })
-      .then((res) => setEstado(res.ok ? 'ok' : 'error'))
-      .catch(() => setEstado('error'))
-      .finally(() => clearTimeout(timeout))
-    return () => {
-      clearTimeout(timeout)
-      controller.abort()
-    }
+    pingHealth()
   }, [])
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 640, margin: '4rem auto', padding: '0 1rem' }}>
-      <h1>🍽️ RestoAPI</h1>
-      <p>En construcción.</p>
-      <p>{mensajes[estado]}</p>
-      <p>
-        <small>API: {API_URL || '(VITE_API_URL sin configurar)'}</small>
-      </p>
-    </main>
+    <ConfirmProvider>
+      <WakeUpBanner />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          element={
+            <RequireAuth>
+              <Layout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<DashboardPage />} />
+          {NAV_ITEMS.map((item) => {
+            const Page = PAGES[item.path]
+            return (
+              <Route
+                key={item.path}
+                path={item.path}
+                element={
+                  <RequireRole roles={item.roles}>{Page ? <Page /> : <PlaceholderPage item={item} />}</RequireRole>
+                }
+              />
+            )
+          })}
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </ConfirmProvider>
   )
 }
