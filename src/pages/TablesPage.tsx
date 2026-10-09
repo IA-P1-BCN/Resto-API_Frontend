@@ -1,16 +1,52 @@
 import { useState } from 'react'
 import { getErrorMessage } from '../api/errors'
-import { listTables, updateTableStatus } from '../api/tables'
+import { deleteTable, listTables, updateTableStatus } from '../api/tables'
 import type { DiningTable, TableStatus } from '../api/types'
 import ErrorMessage from '../components/ErrorMessage'
+import TableForm from '../components/TableForm'
+import { useAuth } from '../context/useAuth'
 import { useQuery } from '../hooks/useQuery'
 import { TABLE_LOCATION_LABEL, TABLE_LOCATIONS, TABLE_STATUS_LABEL, TABLE_STATUSES } from '../utils/labels'
 
-/** Estado de la sala por zonas; sala puede cambiar el estado de cada mesa. */
+/** Formulario de mesa abierto: nueva o editando una. */
+type TableFormState = { mode: 'new' } | { mode: 'edit'; table: DiningTable } | null
+
+/**
+ * Estado de la sala por zonas; sala puede cambiar el estado de cada mesa.
+ * El admin además crea, edita y borra mesas.
+ */
 export default function TablesPage() {
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'admin'
   const tables = useQuery(listTables)
   const [savingId, setSavingId] = useState<number | null>(null)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [tableForm, setTableForm] = useState<TableFormState>(null)
+  const [notice, setNotice] = useState<string | null>(null)
+
+  function handleSaved(table: DiningTable) {
+    setNotice(tableForm?.mode === 'edit' ? `Mesa ${table.number} guardada.` : `Mesa ${table.number} creada.`)
+    setSaveError(null)
+    setTableForm(null)
+    tables.reload()
+  }
+
+  async function handleDelete(table: DiningTable) {
+    if (!window.confirm(`¿Borrar la mesa ${table.number}?`)) return
+    setSavingId(table.id)
+    setSaveError(null)
+    setNotice(null)
+    try {
+      await deleteTable(table.id)
+      setNotice(`Mesa ${table.number} borrada.`)
+      if (tableForm?.mode === 'edit' && tableForm.table.id === table.id) setTableForm(null)
+      tables.reload()
+    } catch (error) {
+      setSaveError(`No se pudo borrar la mesa ${table.number}: ${getErrorMessage(error)}`)
+    } finally {
+      setSavingId(null)
+    }
+  }
 
   async function changeStatus(table: DiningTable, status: TableStatus) {
     setSavingId(table.id)
@@ -32,6 +68,36 @@ export default function TablesPage() {
       <h1>Mesas</h1>
       <p className="muted">Estado de la sala</p>
 
+      {isAdmin && tableForm === null && tables.data && (
+        <div className="toolbar">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              setTableForm({ mode: 'new' })
+              setNotice(null)
+            }}
+          >
+            + Nueva mesa
+          </button>
+        </div>
+      )}
+
+      {isAdmin && tableForm && (
+        <TableForm
+          key={tableForm.mode === 'edit' ? tableForm.table.id : 'new'}
+          table={tableForm.mode === 'edit' ? tableForm.table : undefined}
+          suggestedNumber={Math.max(0, ...list.map((t) => t.number)) + 1}
+          onSaved={handleSaved}
+          onCancel={() => setTableForm(null)}
+        />
+      )}
+
+      {notice && (
+        <div className="banner banner-success" role="status">
+          {notice}
+        </div>
+      )}
       {tables.error && <ErrorMessage message={tables.error} onRetry={tables.reload} />}
       {saveError && <ErrorMessage message={saveError} />}
       {tables.loading && !tables.data && <p className="page-message">Cargando mesas…</p>}
@@ -75,6 +141,30 @@ export default function TablesPage() {
                           ))}
                         </select>
                       </label>
+                      {isAdmin && (
+                        <div className="actions">
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-small"
+                            onClick={() => {
+                              setTableForm({ mode: 'edit', table })
+                              setNotice(null)
+                            }}
+                            aria-label={`Editar mesa ${table.number}`}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-secondary btn-small"
+                            disabled={savingId === table.id}
+                            onClick={() => handleDelete(table)}
+                            aria-label={`Borrar mesa ${table.number}`}
+                          >
+                            Borrar
+                          </button>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
